@@ -1,173 +1,412 @@
 # Product API
 
-This section details the endpoints for managing products.
+Dokumentasi lengkap untuk manajemen produk dan gambar produk dalam sistem.
 
-## Authentication
+⬅️ [Kembali ke Halaman Utama](index.md)
 
-All endpoints require a Bearer Token for authentication. The token can be obtained by logging in.
+## 🎯 Fitur Utama
+- CRUD lengkap untuk produk
+- Upload multiple gambar produk
+- Soft deletes untuk data recovery
+- User tracking untuk audit trail
+- Optimasi query dengan eager loading
 
-## Endpoints
+## 📋 Endpoints Overview
 
-### List Products
+| Method | Endpoint | Deskripsi |
+|--------|----------|-----------|
+| GET | `/api/products` | Mendapatkan semua produk |
+| POST | `/api/products` | Membuat produk baru |
+| GET | `/api/products/{id}` | Mendapatkan detail produk |
+| POST | `/api/products/{id}` | Update produk (gunakan `_method: PUT`) |
+| DELETE | `/api/products/{id}` | Hapus produk (soft delete) |
 
-- **GET** `/api/products`
-- **Description:** Retrieves a list of all products, including their associated images.
-- **Headers:** `Authorization: Bearer <your_access_token>`
-- **Response:**
-  ```json
-  [
-      {
-          "id": 1,
-          "name": "Product 1",
-          "description": "Description for product 1",
-          "price": "19.99",
-          "created_at": "2023-01-01T00:00:00.000000Z",
-          "updated_at": "2023-01-01T00:00:00.000000Z",
-          "images": [
-              {
-                  "id": 1,
-                  "product_id": 1,
-                  "image_path": "http://localhost:8000/storage/product_images/image1.jpg",
-                  "created_at": "2023-01-01T00:00:00.000000Z",
-                  "updated_at": "2023-01-01T00:00:00.000000Z"
-              }
-          ]
-      }
-  ]
-  ```
+## 🔐 Authentication
 
-### Create Product
+**Semua endpoints memerlukan Bearer Token untuk autentikasi.**
 
-- **POST** `/api/products`
-- **Description:** Creates a new product with optional image uploads.
-- **Headers:** `Authorization: Bearer <your_access_token>`
-- **Request Body:** `multipart/form-data`
-  - `name`: (string, required) The name of the product.
-  - `description`: (string, optional) The description of the product.
-  - `price`: (numeric, required) The price of the product.
-  - `images[]`: (file, optional) An array of image files (JPG, PNG, GIF, max 2MB per image).
-- **Response (Success):**
-  ```json
-  {
-      "id": 1,
-      "name": "New Product",
-      "description": "Description for new product",
-      "price": "29.99",
-      "created_at": "2023-01-01T00:00:00.000000Z",
-      "updated_at": "2023-01-01T00:00:00.000000Z",
-      "images": [
-          {
-              "id": 1,
-              "product_id": 1,
-              "image_path": "http://localhost:8000/storage/product_images/new_image.jpg",
-              "created_at": "2023-01-01T00:00:00.000000Z",
-              "updated_at": "2023-01-01T00:00:00.000000Z"
-          }
-      ]
-  }
-  ```
-- **Response (Error - Validation):**
-  ```json
-  {
-      "name": [
-          "The name field is required."
-      ],
-      "price": [
-          "The price field is required."
-      ]
-  }
-  ```
+**Header yang diperlukan:**
+```
+Authorization: Bearer {your_access_token}
+```
 
-### Get Product Details
+## 📊 Data Structure
 
-- **GET** `/api/products/{id}`
-- **Description:** Retrieves the details of a specific product, including its associated images.
-- **Headers:** `Authorization: Bearer <your_access_token>`
-- **URL Parameters:**
-  - `id`: The ID of the product.
-- **Response (Success):**
-  ```json
-  {
-      "id": 1,
-      "name": "Product 1",
-      "description": "Description for product 1",
-      "price": "19.99",
-      "created_at": "2023-01-01T00:00:00.000000Z",
-      "updated_at": "2023-01-01T00:00:00.000000Z",
-      "images": [
-          {
-              "id": 1,
-              "product_id": 1,
-              "image_path": "http://localhost:8000/storage/product_images/image1.jpg",
-              "created_at": "2023-01-01T00:00:00.000000Z",
-              "updated_at": "2023-01-01T00:00:00.000000Z"
-          }
-      ]
-  }
-  ```
-- **Response (Error - Not Found):**
-  ```json
-  {
-      "message": "Product not found"
-  }
-  ```
+### Product Model
+```
+{
+    id: integer,
+    name: string,
+    description: string|null,
+    price: decimal(10,2),
+    category_id: integer|null,
+    user_id: integer,
+    created_at: timestamp,
+    updated_at: timestamp,
+    deleted_at: timestamp|null,
+    user: {
+        id: integer,
+        name: string,
+        email: string
+    },
+    category: {
+        id: integer,
+        name: string
+    },
+    images: [
+        {
+            id: integer,
+            product_id: integer,
+            image_path: string,
+            user_id: integer,
+            created_at: timestamp,
+            updated_at: timestamp,
+            deleted_at: timestamp|null
+        }
+    ]
+}
+```
 
-### Update Product
+## 🔍 Endpoints Detail
 
-- **POST** `/api/products/{id}` (Use `_method: PUT` or `_method: PATCH` for form-data)
-- **Description:** Updates an existing product's details and optionally replaces its images.
-- **Headers:** `Authorization: Bearer <your_access_token>`
-- **URL Parameters:**
-  - `id`: The ID of the product to update.
-- **Request Body:** `multipart/form-data`
-  - `_method`: (string, required) Must be `PUT` or `PATCH` to simulate a PUT/PATCH request with form-data.
-  - `name`: (string, required) The updated name of the product.
-  - `description`: (string, optional) The updated description of the product.
-  - `price`: (numeric, required) The updated price of the product.
-  - `images[]`: (file, optional) An array of new image files. If provided, existing images will be deleted and replaced.
-- **Response (Success):**
-  ```json
-  {
-      "id": 1,
-      "name": "Updated Product Name",
-      "description": "Updated description",
-      "price": "39.99",
-      "created_at": "2023-01-01T00:00:00.000000Z",
-      "updated_at": "2023-01-01T00:00:00.000000Z",
-      "images": [
-          {
-              "id": 2,
-              "product_id": 1,
-              "image_path": "http://localhost:8000/storage/product_images/updated_image.jpg",
-              "created_at": "2023-01-01T00:00:00.000000Z",
-              "updated_at": "2023-01-01T00:00:00.000000Z"
-          }
-      ]
-  }
-  ```
-- **Response (Error - Validation or Not Found):**
-  ```json
-  {
-      "message": "Product not found"
-  }
-  ```
+### 1. List All Products
 
-### Delete Product
+**Endpoint:** `GET /api/products`
 
-- **DELETE** `/api/products/{id}`
-- **Description:** Deletes a specific product and all its associated images from storage.
-- **Headers:** `Authorization: Bearer <your_access_token>`
-- **URL Parameters:**
-  - `id`: The ID of the product to delete.
-- **Response (Success):**
-  ```json
-  {
-      "message": "Product deleted successfully"
-  }
-  ```
-- **Response (Error - Not Found):**
-  ```json
-  {
-      "message": "Product not found"
-  }
-  ```
+**Deskripsi:** Mendapatkan daftar semua produk yang aktif (tidak terhapus), termasuk relasi gambar, user, dan kategori.
+
+**Headers:**
+```
+Authorization: Bearer {your_access_token}
+Accept: application/json
+```
+
+**Query Parameters (optional):**
+- `category_id`: Filter berdasarkan kategori
+- `search`: Search berdasarkan nama produk
+- `sort`: Sort berdasarkan kolom (name, price, created_at)
+- `order`: Urutan sort (asc, desc)
+
+**Response Success (200):**
+```json
+{
+    "data": [
+        {
+            "id": 1,
+            "name": "Laptop Gaming ASUS ROG",
+            "description": "Laptop gaming high-end dengan RTX 4060",
+            "price": "15000000.00",
+            "category_id": 1,
+            "user_id": 1,
+            "created_at": "2024-01-15T08:00:00.000000Z",
+            "updated_at": "2024-01-15T10:30:00.000000Z",
+            "user": {
+                "id": 1,
+                "name": "Admin User",
+                "email": "admin@example.com"
+            },
+            "category": {
+                "id": 1,
+                "name": "Electronics"
+            },
+            "images": [
+                {
+                    "id": 1,
+                    "product_id": 1,
+                    "image_path": "http://localhost:8000/storage/product_images/laptop_1.jpg",
+                    "user_id": 1,
+                    "created_at": "2024-01-15T08:00:00.000000Z",
+                    "updated_at": "2024-01-15T08:00:00.000000Z"
+                }
+            ]
+        }
+    ]
+}
+```
+
+### 2. Create New Product
+
+**Endpoint:** `POST /api/products`
+
+**Deskripsi:** Membuat produk baru dengan upload gambar opsional.
+
+**Headers:**
+```
+Authorization: Bearer {your_access_token}
+Content-Type: multipart/form-data
+```
+
+**Request Body:**
+- `name` (required): string, max:255 - Nama produk
+- `description` (optional): string|null - Deskripsi produk
+- `price` (required): numeric, min:0 - Harga produk
+- `category_id` (optional): integer, exists:categories - ID kategori
+- `images[]` (optional): file, mimes:jpg,jpeg,png,gif, max:2048 - Gambar produk (multiple)
+
+**Response Success (201):**
+```json
+{
+    "message": "Product created successfully",
+    "data": {
+        "id": 2,
+        "name": "Smartphone Samsung Galaxy S24",
+        "description": "Smartphone flagship terbaru dari Samsung",
+        "price": "12000000.00",
+        "category_id": 1,
+        "user_id": 1,
+        "created_at": "2024-01-15T12:00:00.000000Z",
+        "updated_at": "2024-01-15T12:00:00.000000Z",
+        "user": {
+            "id": 1,
+            "name": "Admin User",
+            "email": "admin@example.com"
+        },
+        "category": {
+            "id": 1,
+            "name": "Electronics"
+        },
+        "images": [
+            {
+                "id": 2,
+                "product_id": 2,
+                "image_path": "http://localhost:8000/storage/product_images/samsung_s24_1.jpg",
+                "user_id": 1,
+                "created_at": "2024-01-15T12:00:00.000000Z",
+                "updated_at": "2024-01-15T12:00:00.000000Z"
+            }
+        ]
+    }
+}
+```
+
+**Response Error (422 - Validation):**
+```json
+{
+    "message": "The given data was invalid.",
+    "errors": {
+        "name": [
+            "The name field is required."
+        ],
+        "price": [
+            "The price field is required."
+        ],
+        "images.0": [
+            "The images.0 must be a file of type: jpg, jpeg, png, gif."
+        ]
+    }
+}
+```
+
+### 3. Get Product Details
+
+**Endpoint:** `GET /api/products/{id}`
+
+**Deskripsi:** Mendapatkan detail produk berdasarkan ID, termasuk relasi lengkap.
+
+**Headers:**
+```
+Authorization: Bearer {your_access_token}
+Accept: application/json
+```
+
+**URL Parameters:**
+- `id` (required): integer - ID produk
+
+**Response Success (200):**
+```json
+{
+    "data": {
+        "id": 1,
+        "name": "Laptop Gaming ASUS ROG",
+        "description": "Laptop gaming high-end dengan RTX 4060",
+        "price": "15000000.00",
+        "category_id": 1,
+        "user_id": 1,
+        "created_at": "2024-01-15T08:00:00.000000Z",
+        "updated_at": "2024-01-15T10:30:00.000000Z",
+        "user": {
+            "id": 1,
+            "name": "Admin User",
+            "email": "admin@example.com"
+        },
+        "category": {
+            "id": 1,
+            "name": "Electronics"
+        },
+        "images": [
+            {
+                "id": 1,
+                "product_id": 1,
+                "image_path": "http://localhost:8000/storage/product_images/laptop_1.jpg",
+                "user_id": 1,
+                "created_at": "2024-01-15T08:00:00.000000Z",
+                "updated_at": "2024-01-15T08:00:00.000000Z"
+            }
+        ]
+    }
+}
+```
+
+**Response Error (404 - Not Found):**
+```json
+{
+    "message": "Product not found"
+}
+```
+
+### 4. Update Product
+
+**Endpoint:** `POST /api/products/{id}`
+
+**Deskripsi:** Update produk existing. Gunakan `_method: PUT` untuk form-data atau gunakan `PUT` dengan JSON.
+
+**Headers:**
+```
+Authorization: Bearer {your_access_token}
+Content-Type: multipart/form-data
+```
+
+**URL Parameters:**
+- `id` (required): integer - ID produk
+
+**Request Body:**
+- `_method` (required): string - Isi dengan "PUT" untuk form-data
+- `name` (optional): string, max:255 - Nama produk
+- `description` (optional): string|null - Deskripsi produk
+- `price` (optional): numeric, min:0 - Harga produk
+- `category_id` (optional): integer, exists:categories - ID kategori
+- `images[]` (optional): file, mimes:jpg,jpeg,png,gif, max:2048 - Gambar baru (akan replace existing)
+
+**Response Success (200):**
+```json
+{
+    "message": "Product updated successfully",
+    "data": {
+        "id": 1,
+        "name": "Laptop Gaming ASUS ROG Updated",
+        "description": "Updated description",
+        "price": "16000000.00",
+        "category_id": 2,
+        "user_id": 1,
+        "created_at": "2024-01-15T08:00:00.000000Z",
+        "updated_at": "2024-01-15T14:00:00.000000Z",
+        "user": {
+            "id": 1,
+            "name": "Admin User",
+            "email": "admin@example.com"
+        },
+        "category": {
+            "id": 2,
+            "name": "Gaming"
+        },
+        "images": [
+            {
+                "id": 3,
+                "product_id": 1,
+                "image_path": "http://localhost:8000/storage/product_images/laptop_updated.jpg",
+                "user_id": 1,
+                "created_at": "2024-01-15T14:00:00.000000Z",
+                "updated_at": "2024-01-15T14:00:00.000000Z"
+            }
+        ]
+    }
+}
+```
+
+**Response Error (404 - Not Found):**
+```json
+{
+    "message": "Product not found"
+}
+```
+
+**Response Error (422 - Validation):**
+```json
+{
+    "message": "The given data was invalid.",
+    "errors": {
+        "price": [
+            "The price must be a number."
+        ]
+    }
+}
+```
+
+### 5. Delete Product
+
+**Endpoint:** `DELETE /api/products/{id}`
+
+**Deskripsi:** Soft delete produk (data tidak hilang permanen).
+
+**Headers:**
+```
+Authorization: Bearer {your_access_token}
+Accept: application/json
+```
+
+**URL Parameters:**
+- `id` (required): integer - ID produk
+
+**Response Success (200):**
+```json
+{
+    "message": "Product deleted successfully"
+}
+```
+
+**Response Error (404 - Not Found):**
+```json
+{
+    "message": "Product not found"
+}
+```
+
+## 📝 Notes & Best Practices
+
+### Soft Deletes
+- Produk yang dihapus tidak akan muncul dalam daftar produk
+- Data masih tersimpan di database dengan `deleted_at` timestamp
+- Untuk restore data, perlu akses langsung ke database atau endpoint khusus
+
+### User Tracking
+- Setiap produk mencatat `user_id` dari user yang membuat/mengubahnya
+- Informasi user disertakan dalam response untuk transparansi
+
+### Image Management
+- Gambar disimpan di `storage/app/public/product_images/`
+- URL gambar: `http://localhost:8000/storage/product_images/{filename}`
+- Format yang didukung: JPG, JPEG, PNG, GIF
+- Maksimal ukuran file: 2MB per gambar
+- Gambar lama akan dihapus saat update produk dengan gambar baru
+
+### Pagination
+- Endpoint list products tidak menggunakan pagination untuk simplicity
+- Untuk production, pertimbangkan implementasi pagination
+
+### Error Handling
+- Semua error response menggunakan format JSON standar
+- Validation errors memberikan detail field yang bermasalah
+- HTTP status codes digunakan secara konsisten
+
+## 🐛 Troubleshooting
+
+### Upload Gambar Gagal
+- Pastikan file dalam format yang didukung
+- Pastikan ukuran file tidak melebihi 2MB
+- Pastikan folder `storage/app/public/product_images/` memiliki permission write
+
+### Product Not Found
+- Pastikan ID produk benar
+- Pastikan produk belum dihapus (soft delete)
+
+### Category Not Found
+- Pastikan ID kategori yang digunakan valid
+- Pastikan kategori belum dihapus
+
+## 📞 Dukungan
+
+Untuk pertanyaan atau masalah, silakan buat issue di repository atau hubungi tim pengembang.
+
+---
+
+⬅️ [Kembali ke Halaman Utama](index.md)

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\Category;
+use App\Services\AuditTrailService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
@@ -12,21 +13,60 @@ use Illuminate\Support\Facades\Storage;
 class ProductController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource with query parameters.
+     * 
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with(['images', 'category', 'user'])->get()->map(function ($product) {
-            $product->images->map(function ($image) {
+        // Query builder dengan eager loading
+        $query = Product::with(['images', 'category', 'user']);
+
+        // Filter berdasarkan kategori
+        if ($request->has('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        // Pencarian berdasarkan nama produk
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        // Sorting
+        $sort = $request->get('sort', 'created_at');
+        $order = $request->get('order', 'asc');
+        
+        // Validasi kolom yang bisa di-sort
+        $allowedSorts = ['name', 'price', 'created_at', 'updated_at'];
+        if (in_array($sort, $allowedSorts)) {
+            $query->orderBy($sort, $order === 'desc' ? 'desc' : 'asc');
+        }
+
+        // Pagination
+        $limit = $request->get('limit', 15);
+        $limit = min($limit, 100); // Maksimal 100 item per halaman
+
+        // Filter berdasarkan tanggal
+        if ($request->has('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        
+        if ($request->has('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $products = $query->paginate($limit);
+
+        // Transform URL gambar
+        $products->getCollection()->transform(function ($product) {
+            $product->images->transform(function ($image) {
                 $image->image_path = Storage::url($image->image_path);
                 return $image;
             });
             return $product;
         });
-
-        if ($products->isEmpty()) {
-            return response()->json(['message' => 'No products found'], 200);
-        }
 
         return response()->json($products);
     }
@@ -55,6 +95,9 @@ class ProductController extends Controller
             'category_id' => $request->category_id,
             'user_id' => auth()->id(),
         ]);
+
+        // Catat aktivitas create
+        AuditTrailService::logCreate($product, 'Product', $request);
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
@@ -108,6 +151,8 @@ class ProductController extends Controller
             return response()->json($validator->errors(), 400);
         }
 
+        $oldValues = $product->toArray();
+
         $product->update([
             'name' => $request->name,
             'description' => $request->description,
@@ -115,6 +160,9 @@ class ProductController extends Controller
             'category_id' => $request->category_id,
             'user_id' => auth()->id(),
         ]);
+
+        // Catat aktivitas update
+        AuditTrailService::logUpdate($product, 'Product', $oldValues, $product->toArray(), $request);
 
         if ($request->hasFile('images')) {
             // Delete existing images
@@ -147,12 +195,19 @@ class ProductController extends Controller
             return response()->json(['message' => 'Product not found'], 404);
         }
 
-        // Delete associated images from storage
+        $oldValues = $product->toArray();
+
+        // Delete associated images
         foreach ($product->images as $image) {
             Storage::disk('public')->delete($image->image_path);
+            $image->delete();
         }
 
         $product->delete();
+
+        // Catat aktivitas delete
+        AuditTrailService::logDelete($product, 'Product', $oldValues, request());
+
         return response()->json(['message' => 'Product deleted successfully']);
     }
 }

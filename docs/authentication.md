@@ -1,97 +1,260 @@
 # Authentication API
 
-This section details the authentication endpoints.
+Dokumentasi ini menjelaskan endpoint otentikasi untuk manajemen pengguna menggunakan Laravel Sanctum.
 
-## Register
+⬅️ [Kembali ke Halaman Utama](index.md)
 
-- **POST** `/api/register`
-- **Description:** Registers a new user and returns an access token.
-- **Request Body:**
-  ```json
-  {
-      "name": "Test User",
-      "email": "test@example.com",
-      "password": "password",
-      "password_confirmation": "password"
-  }
-  ```
-- **Response (Success):**
-  ```json
-  {
-      "user": {
-          "name": "Test User",
-          "email": "test@example.com",
-          "updated_at": "2023-01-01T00:00:00.000000Z",
-          "created_at": "2023-01-01T00:00:00.000000Z",
-          "id": 1
-      },
-      "token": "your_access_token"
-  }
-  ```
-- **Response (Error - Validation):**
-  ```json
-  {
-      "message": "The given data was invalid.",
-      "errors": {
-          "email": [
-              "The email has already been taken."
-          ]
-      }
-  }
-  ```
+## 🔐 Fitur Utama
+- Registrasi pengguna baru
+- Login dengan email dan password
+- Mendapatkan informasi user yang sedang login
+- Logout dengan revoke token
 
-## Login
+## 📝 Endpoints Overview
 
-- **POST** `/api/login`
-- **Description:** Authenticates a user and returns an access token.
-- **Request Body:**
-  ```json
-  {
-      "email": "user@example.com",
-      "password": "your_password"
-  }
-  ```
-- **Response (Success):**
-  ```json
-  {
-      "user": {
-          "id": 1,
-          "name": "Test User",
-          "email": "user@example.com",
-          "email_verified_at": null,
-          "created_at": "2023-01-01T00:00:00.000000Z",
-          "updated_at": "2023-01-01T00:00:00.000000Z"
-      },
-      "token": "your_access_token"
-  }
-  ```
-- **Response (Error - Invalid Credentials):**
-  ```json
-  {
-      "message": "Invalid credentials"
-  }
-  ```
+| Method | Endpoint | Deskripsi |
+|--------|----------|-----------|
+| POST | `/api/register` | Registrasi user baru |
+| POST | `/api/login` | Login user |
+| GET | `/api/user` | Get user yang sedang login |
+| POST | `/api/logout` | Logout user |
 
-## Get Authenticated User
+## 🚀 Getting Started
 
-- **GET** `/api/user`
-- **Description:** Retrieves the details of the currently authenticated user.
-- **Headers:** `Authorization: Bearer <your_access_token>`
-- **Response:**
-  ```json
-  {
-      "id": 1,
-      "name": "Test User",
-      "email": "user@example.com",
-      "email_verified_at": null,
-      "created_at": "2023-01-01T00:00:00.000000Z",
-      "updated_at": "2023-01-01T00:00:00.000000Z"
-  }
-  ```
+### 1. Register
 
-## Logout
+**Endpoint:** `POST /api/register`
 
-- **POST** `/api/logout`
-- **Description:** Logs out the authenticated user by revoking their access token.
-- **Headers:** `Authorization: Bearer <your_access_token>`
-- **Response:** `204 No Content`
+**Deskripsi:** Membuat akun pengguna baru dan mengembalikan access token.
+
+**Headers:**
+```
+Content-Type: application/json
+Accept: application/json
+```
+
+**Request Body:**
+```json
+{
+    "name": "Test User",
+    "email": "test@example.com",
+    "password": "password",
+    "password_confirmation": "password"
+}
+```
+
+**Validasi:**
+- `name`: required, string, max:255
+- `email`: required, email, unique:users
+- `password`: required, string, min:8, confirmed
+
+**Response Success (201):**
+```json
+{
+    "user": {
+        "id": 1,
+        "name": "Test User",
+        "email": "test@example.com",
+        "email_verified_at": null,
+        "created_at": "2023-01-01T00:00:00.000000Z",
+        "updated_at": "2023-01-01T00:00:00.000000Z"
+    },
+    "token": "1|laravel_sanctum_token_here"
+}
+```
+
+**Response Error (422 - Validation):**
+```json
+{
+    "message": "The given data was invalid.",
+    "errors": {
+        "email": [
+            "The email has already been taken."
+        ],
+        "password": [
+            "The password confirmation does not match."
+        ]
+    }
+}
+```
+
+### 2. Login
+
+**Endpoint:** `POST /api/login`
+
+**Deskripsi:** Autentikasi user dan mendapatkan access token.
+
+**Headers:**
+```
+Content-Type: application/json
+Accept: application/json
+```
+
+**Request Body:**
+```json
+{
+    "email": "user@example.com",
+    "password": "your_password"
+}
+```
+
+**Response Success (200):**
+```json
+{
+    "user": {
+        "id": 1,
+        "name": "Test User",
+        "email": "user@example.com",
+        "email_verified_at": null,
+        "created_at": "2023-01-01T00:00:00.000000Z",
+        "updated_at": "2023-01-01T00:00:00.000000Z"
+    },
+    "token": "2|laravel_sanctum_token_here"
+}
+```
+
+**Response Error (401 - Invalid Credentials):**
+```json
+{
+    "message": "Invalid credentials"
+}
+```
+
+**Response Error (422 - Validation):**
+```json
+{
+    "message": "The given data was invalid.",
+    "errors": {
+        "email": [
+            "The email field is required."
+        ],
+        "password": [
+            "The password field is required."
+        ]
+    }
+}
+```
+
+### 3. Get Authenticated User
+
+**Endpoint:** `GET /api/user`
+
+**Deskripsi:** Mendapatkan detail user yang sedang login.
+
+**Headers:**
+```
+Authorization: Bearer {your_token}
+Accept: application/json
+```
+
+**Response Success (200):**
+```json
+{
+    "id": 1,
+    "name": "Test User",
+    "email": "user@example.com",
+    "email_verified_at": null,
+    "created_at": "2023-01-01T00:00:00.000000Z",
+    "updated_at": "2023-01-01T00:00:00.000000Z"
+}
+```
+
+**Response Error (401 - Unauthorized):**
+```json
+{
+    "message": "Unauthenticated."
+}
+```
+
+### 4. Logout
+
+**Endpoint:** `POST /api/logout`
+
+**Deskripsi:** Logout user dengan mencabut access token.
+
+**Headers:**
+```
+Authorization: Bearer {your_token}
+Accept: application/json
+```
+
+**Response Success (204):**
+```
+204 No Content
+```
+**Response Error (401 - Unauthorized):**
+```json
+{
+    "message": "Unauthenticated."
+}
+```
+
+## 🔒 Keamanan
+
+### Token Management
+- Token tidak memiliki masa berlaku (tidak expired)
+- Token dapat dicabut saat logout
+- Gunakan HTTPS untuk produksi
+- Simpan token dengan aman di client
+
+### Rate Limiting
+- Tidak ada rate limiting khusus untuk endpoint auth
+- Implementasikan rate limiting di production untuk mencegah brute force
+
+## 📝 Best Practices
+
+1. **Validasi Input**: Selalu validasi input di client dan server
+2. **Password Security**: Gunakan password yang kuat (min 8 karakter)
+3. **Token Storage**: Simpan token di secure storage (localStorage/sessionStorage)
+4. **HTTPS**: Selalu gunakan HTTPS untuk production
+5. **Token Refresh**: Implementasikan refresh token mechanism untuk aplikasi mobile
+
+## 🐛 Troubleshooting
+
+### Email sudah terdaftar
+Pastikan email yang digunakan belum terdaftar di sistem.
+
+### Password tidak match
+Pastikan password dan password_confirmation sama persis.
+
+### Token tidak valid
+Pastikan token masih aktif dan tidak dicabut.
+
+### Unauthorized errors
+Pastikan token disertakan dalam header dengan format yang benar: `Authorization: Bearer {token}`
+
+---
+
+⬅️ [Kembali ke Halaman Utama](index.md)
+
+### Token Management
+- Token tidak memiliki masa berlaku (tidak expired)
+- Token dapat dicabut saat logout
+- Gunakan HTTPS untuk produksi
+- Simpan token dengan aman di client
+
+### Rate Limiting
+- Tidak ada rate limiting khusus untuk endpoint auth
+- Implementasikan rate limiting di production untuk mencegah brute force
+
+## 📝 Best Practices
+
+1. **Validasi Input**: Selalu validasi input di client dan server
+2. **Password Security**: Gunakan password yang kuat (min 8 karakter)
+3. **Token Storage**: Simpan token di secure storage (localStorage/sessionStorage)
+4. **HTTPS**: Selalu gunakan HTTPS untuk production
+5. **Token Refresh**: Implementasikan refresh token mechanism untuk aplikasi mobile
+
+## 🐛 Troubleshooting
+
+### Email sudah terdaftar
+Pastikan email yang digunakan belum terdaftar di sistem.
+
+### Password tidak match
+Pastikan password dan password_confirmation sama persis.
+
+### Token tidak valid
+Pastikan token masih aktif dan tidak dicabut.
+
+### Unauthorized errors
+Pastikan token disertakan dalam header dengan format yang benar: `Authorization: Bearer {token}`

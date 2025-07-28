@@ -1,7 +1,74 @@
 # API Documentation
 
-Welcome to the API documentation. Please select a section to view detailed information.
+Selamat datang di dokumentasi API Hacktiv8 Laravel Final Project. Dokumentasi ini berisi panduan lengkap untuk menggunakan semua endpoint yang tersedia.
 
-- [Authentication API](authentication.md)
-- [Storage API](storage.md)
-- [Product API](products.md)
+## 🧭 Navigasi Cepat
+
+Gunakan tabel di bawah ini untuk navigasi cepat ke dokumentasi yang Anda butuhkan:
+
+## 📋 Daftar Isi
+
+| API | Deskripsi | Dokumentasi |
+|-----|-----------|-------------|
+| 🔐 **Authentication** | Otentikasi pengguna (Register, Login, Logout) | [Lihat Dokumentasi](authentication.md) |
+| 💾 **Storage** | Manajemen file storage | [Lihat Dokumentasi](storage.md) |
+| 🛍️ **Product** | Manajemen produk dan gambar produk | [Lihat Dokumentasi](products.md) |
+| 🏷️ **Category** | Manajemen kategori produk | [Lihat Dokumentasi](category.md) |
+| 💳 **Transaction** | Manajemen transaksi pembelian | [Lihat Dokumentasi](transactions.md) |
+| 📊 **Audit Trail** | Pelacakan aktivitas CRUD & audit log | [Lihat Dokumentasi](audit-trail.md) |
+
+## 🚀 Fitur Utama
+
+### Soft Deletes
+Semua model dalam API ini menggunakan fitur **soft deletes**, yang berarti:
+- Data yang dihapus tidak akan hilang permanen dari database
+- Data yang dihapus akan memiliki nilai `deleted_at` yang terisi
+- Data yang dihapus tidak akan muncul dalam query normal
+- Data dapat dipulihkan jika diperlukan
+
+### User Tracking
+Setiap entitas yang dibuat atau diperbarui akan mencatat informasi user yang melakukan aksi:
+- `user_id`: ID dari user yang membuat/mengubah data
+- Informasi user akan disertakan dalam response untuk transparansi
+
+### Eager Loading
+API menggunakan eager loading untuk optimasi performa query dan menyertakan relasi yang relevan dalam response.
+
+## 🛠️ Teknologi yang Digunakan
+
+- **Framework**: Laravel 12
+- **Authentication**: Laravel Sanctum
+- **Database**: SQLite
+- **File Storage**: Laravel Storage (public disk)
+- **Validation**: Laravel Validation
+- **Testing**: PHPUnit & Pest
+
+## 📖 Cara Menggunakan
+
+1. **Registrasi**: Gunakan endpoint `/api/register` untuk membuat akun baru
+2. **Login**: Gunakan endpoint `/api/login` untuk mendapatkan access token
+3. **Gunakan Token**: Sertakan token dalam header setiap request: `Authorization: Bearer {token}`
+4. **Akses Endpoint**: Gunakan endpoint sesuai kebutuhan Anda
+
+## 📋 Status Response
+
+| Status Code | Deskripsi |
+|-------------|-----------|
+| 200 | Success |
+| 201 | Created |
+| 204 | No Content |
+| 400 | Bad Request |
+| 401 | Unauthorized |
+| 404 | Not Found |
+| 422 | Validation Error |
+| 500 | Server Error |
+
+## 🔗 Base URL
+
+```
+http://localhost:8000
+```
+
+## 📞 Dukungan
+
+Untuk pertanyaan atau masalah, silakan buat issue di repository atau hubungi tim pengembang.
