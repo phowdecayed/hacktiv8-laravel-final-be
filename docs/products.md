@@ -39,6 +39,7 @@ Authorization: Bearer {your_access_token}
     name: string,
     description: string|null,
     price: decimal(10,2),
+    stock: integer,
     category_id: integer|null,
     user_id: integer,
     created_at: timestamp,
@@ -140,6 +141,7 @@ Content-Type: multipart/form-data
 - `name` (required): string, max:255 - Nama produk
 - `description` (optional): string|null - Deskripsi produk
 - `price` (required): numeric, min:0 - Harga produk
+- `stock` (required): integer, min:0 - Jumlah stock produk
 - `category_id` (optional): integer, exists:categories - ID kategori
 - `images[]` (optional): file, mimes:jpg,jpeg,png,gif, max:2048 - Gambar produk (multiple)
 

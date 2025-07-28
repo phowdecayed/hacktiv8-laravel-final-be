@@ -86,20 +86,93 @@ class AuthController extends Controller
     }
 
     /**
-     * Handle user logout
+     * Get authenticated user information
      * 
      * @param Request $request Request dengan token autentikasi
-     * @return \Illuminate\Http\JsonResponse Response JSON konfirmasi logout
+     * @return \Illuminate\Http\JsonResponse Response JSON dengan data user lengkap
      */
     public function user(Request $request)
     {
+        $user = $request->user();
+        
+        // Load relasi yang dibutuhkan
+        $user->loadCount(['products', 'categories', 'transactions']);
+
+        // Tentukan permissions berdasarkan role
+        $permissions = $this->getUserPermissions($user->role);
+
+        // Siapkan data komprehensif
+        $userData = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+            'email_verified_at' => $user->email_verified_at,
+            'created_at' => $user->created_at,
+            'updated_at' => $user->updated_at,
+            'permissions' => $permissions,
+            'statistics' => [
+                'total_products' => $user->products_count,
+                'total_categories' => $user->categories_count,
+                'total_transactions' => $user->transactions_count,
+            ],
+            'role_description' => $this->getRoleDescription($user->role),
+            'api_token_count' => $user->tokens()->count(),
+            'last_login' => $user->tokens()->latest()->first()?->last_used_at,
+        ];
+
         return response()->json([
             'success' => true,
             'message' => 'Data user berhasil diambil',
             'data' => [
-                'user' => $request->user()
+                'user' => $userData
             ]
         ]);
+    }
+
+    /**
+     * Get user permissions based on role.
+     */
+    private function getUserPermissions(?string $role): array
+    {
+        $permissions = [
+            'admin' => [
+                'manage_products', 'manage_categories', 'manage_transactions', 
+                'manage_users', 'view_audit_trails', 'manage_storage'
+            ],
+            'editor' => [
+                'manage_products', 'manage_categories', 'create_transactions',
+                'manage_storage'
+            ],
+            'moderator' => [
+                'view_transactions', 'update_transactions', 'view_audit_trails',
+                'create_transactions'
+            ],
+            'user' => [
+                'create_transactions', 'view_own_transactions'
+            ]
+        ];
+
+        // Gunakan 'user' sebagai default jika role null atau tidak dikenal
+        $effectiveRole = $role ?? 'user';
+        return $permissions[$effectiveRole] ?? $permissions['user'];
+    }
+
+    /**
+     * Get role description.
+     */
+    private function getRoleDescription(?string $role): string
+    {
+        $descriptions = [
+            'admin' => 'Full access to all system features and user management',
+            'editor' => 'Can manage products, categories, and storage',
+            'moderator' => 'Can manage transactions and view audit trails',
+            'user' => 'Can create transactions and view own data'
+        ];
+
+        // Gunakan 'user' sebagai default jika role null atau tidak dikenal
+        $effectiveRole = $role ?? 'user';
+        return $descriptions[$effectiveRole] ?? 'Standard user role';
     }
 
     /**

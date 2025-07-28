@@ -40,10 +40,9 @@ Authorization: Bearer {your_access_token}
 {
     id: integer,
     user_id: integer,
-    product_id: integer,
-    quantity: integer,
-    total_price: decimal,
+    total_amount: decimal,
     status: string,
+    notes: string|null,
     created_at: timestamp,
     updated_at: timestamp,
     deleted_at: timestamp|null,
@@ -52,6 +51,36 @@ Authorization: Bearer {your_access_token}
         name: string,
         email: string
     },
+    items: [
+        {
+            id: integer,
+            product_id: integer,
+            quantity: integer,
+            price: decimal,
+            total: decimal,
+            product: {
+                id: integer,
+                name: string,
+                price: decimal,
+                description: string,
+                stock: integer
+            }
+        }
+    ]
+}
+```
+
+### Transaction Item Model
+```
+{
+    id: integer,
+    transaction_id: integer,
+    product_id: integer,
+    quantity: integer,
+    price: decimal,
+    total: decimal,
+    created_at: timestamp,
+    updated_at: timestamp,
     product: {
         id: integer,
         name: string,
@@ -76,16 +105,17 @@ Authorization: Bearer {your_access_token}
 ## 💰 Price Calculation
 
 ### Automatic Calculation
-- **Formula:** `total_price = quantity × product.price`
-- **Validasi:** Stok harus cukup untuk quantity yang diminta
+- **Formula per item:** `total = quantity × price`
+- **Formula total:** `total_amount = sum(all items total)`
+- **Validasi:** Stok harus cukup untuk semua items yang diminta
 - **Rounding:** 2 decimal places untuk precision
 - **Currency:** IDR (Indonesian Rupiah)
 
 ### Example Calculation
 ```
-Product: Laptop Gaming - Rp 15,000,000
-Quantity: 2
-Total Price: 2 × 15,000,000 = Rp 30,000,000
+Item 1: Laptop Gaming - Rp 15,000,000 × 2 = Rp 30,000,000
+Item 2: Gaming Mouse - Rp 5,000,000 × 1 = Rp 5,000,000
+Total Transaction: Rp 30,000,000 + Rp 5,000,000 = Rp 35,000,000
 ```
 
 ## 🔍 Endpoints Detail
@@ -105,10 +135,9 @@ Accept: application/json
 **Query Parameters (optional):**
 - `status`: Filter berdasarkan status transaksi
 - `user_id`: Filter berdasarkan user ID
-- `product_id`: Filter berdasarkan product ID
 - `date_from`: Filter transaksi dari tanggal (YYYY-MM-DD)
 - `date_to`: Filter transaksi sampai tanggal (YYYY-MM-DD)
-- `sort`: Sort berdasarkan kolom (created_at, total_price, quantity)
+- `sort`: Sort berdasarkan kolom (created_at, total_amount)
 - `order`: Urutan sort (asc, desc)
 - `limit`: Jumlah data per halaman (default: 10)
 
@@ -119,10 +148,9 @@ Accept: application/json
         {
             "id": 1,
             "user_id": 1,
-            "product_id": 1,
-            "quantity": 2,
-            "total_price": 30000000,
+            "total_amount": 35000000,
             "status": "pending",
+            "notes": "Pesanan untuk kantor baru",
             "created_at": "2024-01-15T08:00:00.000000Z",
             "updated_at": "2024-01-15T08:00:00.000000Z",
             "deleted_at": null,
@@ -131,36 +159,36 @@ Accept: application/json
                 "name": "Admin User",
                 "email": "admin@example.com"
             },
-            "product": {
-                "id": 1,
-                "name": "Laptop Gaming",
-                "price": 15000000,
-                "description": "High-performance gaming laptop",
-                "stock": 50
-            }
-        },
-        {
-            "id": 2,
-            "user_id": 2,
-            "product_id": 3,
-            "quantity": 1,
-            "total_price": 5000000,
-            "status": "processing",
-            "created_at": "2024-01-15T09:00:00.000000Z",
-            "updated_at": "2024-01-15T09:00:00.000000Z",
-            "deleted_at": null,
-            "user": {
-                "id": 2,
-                "name": "John Doe",
-                "email": "john@example.com"
-            },
-            "product": {
-                "id": 3,
-                "name": "Gaming Mouse",
-                "price": 5000000,
-                "description": "RGB gaming mouse",
-                "stock": 100
-            }
+            "items": [
+                {
+                    "id": 1,
+                    "product_id": 1,
+                    "quantity": 2,
+                    "price": 15000000,
+                    "total": 30000000,
+                    "product": {
+                        "id": 1,
+                        "name": "Laptop Gaming",
+                        "price": 15000000,
+                        "description": "High-performance gaming laptop",
+                        "stock": 48
+                    }
+                },
+                {
+                    "id": 2,
+                    "product_id": 3,
+                    "quantity": 1,
+                    "price": 5000000,
+                    "total": 5000000,
+                    "product": {
+                        "id": 3,
+                        "name": "Gaming Mouse",
+                        "price": 5000000,
+                        "description": "RGB gaming mouse",
+                        "stock": 99
+                    }
+                }
+            ]
         }
     ]
 }
@@ -170,7 +198,7 @@ Accept: application/json
 
 **Endpoint:** `POST /api/transactions`
 
-**Deskripsi:** Membuat transaksi baru untuk user yang sedang login.
+**Deskripsi:** Membuat transaksi baru untuk user yang sedang login. Mendukung multiple items dalam satu transaksi.
 
 **Headers:**
 ```
@@ -182,16 +210,37 @@ Content-Type: application/json
 **Request Body:**
 ```json
 {
-    "product_id": 1,
-    "quantity": 2,
+    "items": [
+        {
+            "product_id": 1,
+            "quantity": 2
+        },
+        {
+            "product_id": 3,
+            "quantity": 1
+        }
+    ],
+    "notes": "Pesanan untuk kantor baru",
     "status": "pending"
 }
 ```
 
 **Field Validations:**
-- `product_id` (required): integer - ID produk yang valid
-- `quantity` (required): integer - Minimal 1, maksimal sesuai stok produk
+- `items` (required): array - Minimal 1 item
+- `items.*.product_id` (required): integer - ID produk yang valid
+- `items.*.quantity` (required): integer - Minimal 1, maksimal sesuai stok produk
+- `notes` (optional): string - Catatan tambahan untuk transaksi
 - `status` (optional): string - Salah satu dari: pending, processing, shipped, delivered, cancelled, refunded
+
+**Stock Validation:**
+- Sistem akan memvalidasi stok untuk semua produk sebelum membuat transaksi
+- Jika stok tidak cukup untuk salah satu produk, akan mengembalikan error `422`
+- Stok akan berkurang otomatis saat transaksi berstatus `completed`
+- Stok akan dikembalikan jika transaksi dibatalkan
+
+**Price Calculation:**
+- Total transaksi akan dihitung otomatis dari semua items
+- Formula: `total_amount = sum(items.quantity × items.price)`
 
 **Response Success (201):**
 ```json
@@ -200,10 +249,9 @@ Content-Type: application/json
     "data": {
         "id": 3,
         "user_id": 1,
-        "product_id": 1,
-        "quantity": 2,
-        "total_price": 30000000,
+        "total_amount": 35000000,
         "status": "pending",
+        "notes": "Pesanan untuk kantor baru",
         "created_at": "2024-01-15T10:00:00.000000Z",
         "updated_at": "2024-01-15T10:00:00.000000Z",
         "deleted_at": null,
@@ -212,13 +260,36 @@ Content-Type: application/json
             "name": "Admin User",
             "email": "admin@example.com"
         },
-        "product": {
-            "id": 1,
-            "name": "Laptop Gaming",
-            "price": 15000000,
-            "description": "High-performance gaming laptop",
-            "stock": 48
-        }
+        "items": [
+            {
+                "id": 1,
+                "product_id": 1,
+                "quantity": 2,
+                "price": 15000000,
+                "total": 30000000,
+                "product": {
+                    "id": 1,
+                    "name": "Laptop Gaming",
+                    "price": 15000000,
+                    "description": "High-performance gaming laptop",
+                    "stock": 48
+                }
+            },
+            {
+                "id": 2,
+                "product_id": 3,
+                "quantity": 1,
+                "price": 5000000,
+                "total": 5000000,
+                "product": {
+                    "id": 3,
+                    "name": "Gaming Mouse",
+                    "price": 5000000,
+                    "description": "RGB gaming mouse",
+                    "stock": 99
+                }
+            }
+        ]
     }
 }
 ```
@@ -228,16 +299,19 @@ Content-Type: application/json
 {
     "message": "The given data was invalid.",
     "errors": {
-        "product_id": [
+        "items": [
+            "The items field is required."
+        ],
+        "items.*.product_id": [
             "The product id field is required."
         ],
-        "quantity": [
+        "items.*.quantity": [
             "The quantity must be at least 1."
         ],
-        "product_id": [
+        "items.*.product_id": [
             "The selected product id is invalid."
         ],
-        "quantity": [
+        "items.*.quantity": [
             "The requested quantity exceeds available stock."
         ]
     }
@@ -247,11 +321,15 @@ Content-Type: application/json
 **Response Error (400 - Stock):**
 ```json
 {
-    "message": "Insufficient stock for this product",
-    "data": {
-        "available_stock": 5,
-        "requested_quantity": 10
-    }
+    "message": "Insufficient stock for one or more products",
+    "data": [
+        {
+            "product_id": 1,
+            "product_name": "Laptop Gaming",
+            "available_stock": 5,
+            "requested_quantity": 10
+        }
+    ]
 }
 ```
 
@@ -276,10 +354,9 @@ Accept: application/json
     "data": {
         "id": 1,
         "user_id": 1,
-        "product_id": 1,
-        "quantity": 2,
-        "total_price": 30000000,
+        "total_amount": 35000000,
         "status": "pending",
+        "notes": "Pesanan untuk kantor baru",
         "created_at": "2024-01-15T08:00:00.000000Z",
         "updated_at": "2024-01-15T08:00:00.000000Z",
         "deleted_at": null,
@@ -288,27 +365,50 @@ Accept: application/json
             "name": "Admin User",
             "email": "admin@example.com"
         },
-        "product": {
-            "id": 1,
-            "name": "Laptop Gaming",
-            "price": 15000000,
-            "description": "High-performance gaming laptop",
-            "stock": 50,
-            "images": [
-                {
+        "items": [
+            {
+                "id": 1,
+                "product_id": 1,
+                "quantity": 2,
+                "price": 15000000,
+                "total": 30000000,
+                "product": {
                     "id": 1,
-                    "image_path": "products/laptop_1.jpg",
-                    "is_primary": true
+                    "name": "Laptop Gaming",
+                    "price": 15000000,
+                    "description": "High-performance gaming laptop",
+                    "stock": 50,
+                    "images": [
+                        {
+                            "id": 1,
+                            "image_path": "products/laptop_1.jpg",
+                            "is_primary": true
+                        }
+                    ],
+                    "categories": [
+                        {
+                            "id": 1,
+                            "name": "Electronics",
+                            "description": "Electronic devices"
+                        }
+                    ]
                 }
-            ],
-            "categories": [
-                {
-                    "id": 1,
-                    "name": "Electronics",
-                    "description": "Electronic devices"
+            },
+            {
+                "id": 2,
+                "product_id": 3,
+                "quantity": 1,
+                "price": 5000000,
+                "total": 5000000,
+                "product": {
+                    "id": 3,
+                    "name": "Gaming Mouse",
+                    "price": 5000000,
+                    "description": "RGB gaming mouse",
+                    "stock": 100
                 }
-            ]
-        }
+            }
+        ]
     }
 }
 ```
@@ -324,7 +424,7 @@ Accept: application/json
 
 **Endpoint:** `PUT /api/transactions/{id}`
 
-**Deskripsi:** Memperbarui transaksi yang sudah ada. Hanya user yang membuat transaksi yang bisa mengupdate.
+**Deskripsi:** Memperbarui status transaksi yang sudah ada. Hanya user yang membuat transaksi yang bisa mengupdate.
 
 **Headers:**
 ```
@@ -339,14 +439,16 @@ Content-Type: application/json
 **Request Body:**
 ```json
 {
-    "quantity": 3,
     "status": "processing"
 }
 ```
 
 **Field Validations:**
-- `quantity` (optional): integer - Minimal 1, maksimal sesuai stok produk
-- `status` (optional): string - Salah satu dari: pending, processing, shipped, delivered, cancelled, refunded
+- `status` (required): string - Salah satu dari: pending, processing, shipped, delivered, cancelled, refunded
+
+**Stock Management:**
+- Saat mengubah status ke 'cancelled', stok akan dikembalikan untuk semua items
+- Validasi stok akan dilakukan untuk setiap perubahan status
 
 **Response Success (200):**
 ```json
@@ -355,10 +457,9 @@ Content-Type: application/json
     "data": {
         "id": 1,
         "user_id": 1,
-        "product_id": 1,
-        "quantity": 3,
-        "total_price": 45000000,
+        "total_amount": 35000000,
         "status": "processing",
+        "notes": "Pesanan untuk kantor baru",
         "created_at": "2024-01-15T08:00:00.000000Z",
         "updated_at": "2024-01-15T11:00:00.000000Z",
         "deleted_at": null,
@@ -367,13 +468,36 @@ Content-Type: application/json
             "name": "Admin User",
             "email": "admin@example.com"
         },
-        "product": {
-            "id": 1,
-            "name": "Laptop Gaming",
-            "price": 15000000,
-            "description": "High-performance gaming laptop",
-            "stock": 47
-        }
+        "items": [
+            {
+                "id": 1,
+                "product_id": 1,
+                "quantity": 2,
+                "price": 15000000,
+                "total": 30000000,
+                "product": {
+                    "id": 1,
+                    "name": "Laptop Gaming",
+                    "price": 15000000,
+                    "description": "High-performance gaming laptop",
+                    "stock": 50
+                }
+            },
+            {
+                "id": 2,
+                "product_id": 3,
+                "quantity": 1,
+                "price": 5000000,
+                "total": 5000000,
+                "product": {
+                    "id": 3,
+                    "name": "Gaming Mouse",
+                    "price": 5000000,
+                    "description": "RGB gaming mouse",
+                    "stock": 100
+                }
+            }
+        ]
     }
 }
 ```
@@ -390,8 +514,8 @@ Content-Type: application/json
 {
     "message": "The given data was invalid.",
     "errors": {
-        "quantity": [
-            "The quantity must be at least 1."
+        "status": [
+            "The status field is required."
         ],
         "status": [
             "The selected status is invalid."
@@ -452,7 +576,7 @@ Accept: application/json
 - `status`: Filter berdasarkan status transaksi
 - `date_from`: Filter transaksi dari tanggal (YYYY-MM-DD)
 - `date_to`: Filter transaksi sampai tanggal (YYYY-MM-DD)
-- `sort`: Sort berdasarkan kolom (created_at, total_price, quantity)
+- `sort`: Sort berdasarkan kolom (created_at, total_amount)
 - `order`: Urutan sort (asc, desc)
 
 **Response Success (200):**
@@ -462,10 +586,9 @@ Accept: application/json
         {
             "id": 1,
             "user_id": 1,
-            "product_id": 1,
-            "quantity": 2,
-            "total_price": 30000000,
+            "total_amount": 35000000,
             "status": "pending",
+            "notes": "Pesanan untuk kantor baru",
             "created_at": "2024-01-15T08:00:00.000000Z",
             "updated_at": "2024-01-15T08:00:00.000000Z",
             "deleted_at": null,
@@ -474,20 +597,43 @@ Accept: application/json
                 "name": "Admin User",
                 "email": "admin@example.com"
             },
-            "product": {
-                "id": 1,
-                "name": "Laptop Gaming",
-                "price": 15000000,
-                "description": "High-performance gaming laptop",
-                "stock": 50,
-                "images": [
-                    {
+            "items": [
+                {
+                    "id": 1,
+                    "product_id": 1,
+                    "quantity": 2,
+                    "price": 15000000,
+                    "total": 30000000,
+                    "product": {
                         "id": 1,
-                        "image_path": "products/laptop_1.jpg",
-                        "is_primary": true
+                        "name": "Laptop Gaming",
+                        "price": 15000000,
+                        "description": "High-performance gaming laptop",
+                        "stock": 50,
+                        "images": [
+                            {
+                                "id": 1,
+                                "image_path": "products/laptop_1.jpg",
+                                "is_primary": true
+                            }
+                        ]
                     }
-                ]
-            }
+                },
+                {
+                    "id": 2,
+                    "product_id": 3,
+                    "quantity": 1,
+                    "price": 5000000,
+                    "total": 5000000,
+                    "product": {
+                        "id": 3,
+                        "name": "Gaming Mouse",
+                        "price": 5000000,
+                        "description": "RGB gaming mouse",
+                        "stock": 100
+                    }
+                }
+            ]
         }
     ]
 }

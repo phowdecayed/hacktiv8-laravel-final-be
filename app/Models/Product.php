@@ -2,19 +2,20 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
      *
      * @var array<string>
      */
-    protected $fillable = ['name', 'description', 'price', 'category_id', 'user_id'];
+    protected $fillable = ['name', 'description', 'price', 'stock', 'category_id', 'user_id'];
 
     /**
      * Get the images for the product.

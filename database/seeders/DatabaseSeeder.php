@@ -3,6 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Product;
+use App\Models\Category;
+use App\Models\Transaction;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -13,20 +16,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Run role seeder
+        $this->call(RoleSeeder::class);
 
-        // Membuat user admin untuk testing
-        User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-            'password' => bcrypt('password123'),
-        ]);
+        // Create categories
+        Category::factory()->count(5)->create();
 
-        // Membuat user biasa untuk testing
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'user@example.com',
-            'password' => bcrypt('password123'),
-        ]);
+        // Create products
+        Product::factory()->count(20)->create();
+
+        // Create transactions for testing
+        Transaction::factory()->count(30)->create();
     }
 }

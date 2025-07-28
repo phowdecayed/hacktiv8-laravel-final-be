@@ -14,8 +14,10 @@ Gunakan tabel di bawah ini untuk navigasi cepat ke dokumentasi yang Anda butuhka
 | 💾 **Storage** | Manajemen file storage | [Lihat Dokumentasi](storage.md) |
 | 🛍️ **Product** | Manajemen produk dan gambar produk | [Lihat Dokumentasi](products.md) |
 | 🏷️ **Category** | Manajemen kategori produk | [Lihat Dokumentasi](category.md) |
+| 🛒 **Shopping Cart** | Manajemen keranjang belanja | [Lihat Dokumentasi](shopping-cart.md) |
 | 💳 **Transaction** | Manajemen transaksi pembelian | [Lihat Dokumentasi](transactions.md) |
 | 📊 **Audit Trail** | Pelacakan aktivitas CRUD & audit log | [Lihat Dokumentasi](audit-trail.md) |
+| 🔐 **Roles & Permissions** | Sistem role-based access control | [Lihat Dokumentasi](roles-and-permissions.md) |
 
 ## 🚀 Fitur Utama
 
