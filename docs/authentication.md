@@ -2,6 +2,44 @@
 
 This section details the authentication endpoints.
 
+## Register
+
+- **POST** `/api/register`
+- **Description:** Registers a new user and returns an access token.
+- **Request Body:**
+  ```json
+  {
+      "name": "Test User",
+      "email": "test@example.com",
+      "password": "password",
+      "password_confirmation": "password"
+  }
+  ```
+- **Response (Success):**
+  ```json
+  {
+      "user": {
+          "name": "Test User",
+          "email": "test@example.com",
+          "updated_at": "2023-01-01T00:00:00.000000Z",
+          "created_at": "2023-01-01T00:00:00.000000Z",
+          "id": 1
+      },
+      "token": "your_access_token"
+  }
+  ```
+- **Response (Error - Validation):**
+  ```json
+  {
+      "message": "The given data was invalid.",
+      "errors": {
+          "email": [
+              "The email has already been taken."
+          ]
+      }
+  }
+  ```
+
 ## Login
 
 - **POST** `/api/login`

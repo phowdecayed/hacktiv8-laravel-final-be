@@ -26,7 +26,7 @@ All endpoints require a Bearer Token for authentication. The token can be obtain
 - **POST** `/api/storage`
 - **Description:** Uploads a new file to the storage. Files are stored directly in the root of the `public` disk (e.g., `storage/app/public/`).
 - **Headers:** `Authorization: Bearer <your_access_token>`
-- **Request Body:** `multipart/form-data` with a `file` field containing the file.
+- **Request Body:** `multipart/form-data` with a `file` field containing an image file (e.g., JPG, PNG, GIF).
 - **Response:**
   ```json
   {

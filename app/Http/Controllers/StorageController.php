@@ -15,7 +15,7 @@ class StorageController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'file' => 'required',
+            'file' => 'required|image',
         ]);
 
         $path = $request->file('file')->store('/', 'public');

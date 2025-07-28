@@ -4,3 +4,4 @@ Welcome to the API documentation. Please select a section to view detailed infor
 
 - [Authentication API](authentication.md)
 - [Storage API](storage.md)
+- [Product API](products.md)

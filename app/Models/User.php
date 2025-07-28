@@ -35,6 +35,30 @@ class User extends Authenticatable
     ];
 
     /**
+     * Get all categories created by the user.
+     */
+    public function categories()
+    {
+        return $this->hasMany(Category::class);
+    }
+
+    /**
+     * Get all products created by the user.
+     */
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
+
+    /**
+     * Get all product images uploaded by the user.
+     */
+    public function productImages()
+    {
+        return $this->hasMany(ProductImage::class);
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
