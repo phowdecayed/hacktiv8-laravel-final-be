@@ -24,7 +24,7 @@ All endpoints require a Bearer Token for authentication. The token can be obtain
 ### Upload File
 
 - **POST** `/api/storage`
-- **Description:** Uploads a new file to the storage.
+- **Description:** Uploads a new file to the storage. Files are stored directly in the root of the `public` disk (e.g., `storage/app/public/`).
 - **Headers:** `Authorization: Bearer <your_access_token>`
 - **Request Body:** `multipart/form-data` with a `file` field containing the file.
 - **Response:**
@@ -51,4 +51,9 @@ All endpoints require a Bearer Token for authentication. The token can be obtain
 - **Headers:** `Authorization: Bearer <your_access_token>`
 - **URL Parameters:**
   - `filename`: The name of the file to delete (e.g., `public/your-file-name.ext`).
-- **Response:** `204 No Content`
+- **Response:**
+  ```json
+  {
+      "message": "File deleted successfully"
+  }
+  ```
