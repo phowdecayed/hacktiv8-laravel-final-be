@@ -13,5 +13,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    Route::apiResource('storage', StorageController::class);
+    Route::get('/storage', [StorageController::class, 'index']);
+    Route::post('/storage', [StorageController::class, 'store']);
+    Route::get('/storage/{filename}', [StorageController::class, 'show']);
+    Route::delete('/storage/{filename}', [StorageController::class, 'destroy']);
 });
