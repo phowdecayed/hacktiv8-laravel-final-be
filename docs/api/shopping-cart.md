@@ -392,11 +392,12 @@ curl -X PUT http://localhost:8000/api/cart/1 \
 
 4. **Checkout (Create Transaction):**
 ```bash
-curl -X POST http://localhost:8000/api/transactions \
+curl -X POST http://localhost:8000/api/cart/checkout \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"product_id": 1, "quantity": 3}'
+  -d '{"notes": "Pesanan dari keranjang"}'
 ```
+
 
 5. **Bersihkan Keranjang:**
 ```bash

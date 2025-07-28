@@ -10,14 +10,14 @@ Gunakan tabel di bawah ini untuk navigasi cepat ke dokumentasi yang Anda butuhka
 
 | API | Deskripsi | Dokumentasi |
 |-----|-----------|-------------|
-| 🔐 **Authentication** | Otentikasi pengguna (Register, Login, Logout) | [Lihat Dokumentasi](authentication.md) |
-| 💾 **Storage** | Manajemen file storage | [Lihat Dokumentasi](storage.md) |
-| 🛍️ **Product** | Manajemen produk dan gambar produk | [Lihat Dokumentasi](products.md) |
-| 🏷️ **Category** | Manajemen kategori produk | [Lihat Dokumentasi](category.md) |
-| 🛒 **Shopping Cart** | Manajemen keranjang belanja | [Lihat Dokumentasi](shopping-cart.md) |
-| 💳 **Transaction** | Manajemen transaksi pembelian | [Lihat Dokumentasi](transactions.md) |
-| 📊 **Audit Trail** | Pelacakan aktivitas CRUD & audit log | [Lihat Dokumentasi](audit-trail.md) |
-| 🔐 **Roles & Permissions** | Sistem role-based access control | [Lihat Dokumentasi](roles-and-permissions.md) |
+| 🔐 **Authentication** | Otentikasi pengguna (Register, Login, Logout) | [Lihat Dokumentasi](api/authentication.md) |
+| 💾 **Storage** | Manajemen file storage | [Lihat Dokumentasi](api/storage.md) |
+| 🛍️ **Product** | Manajemen produk dan gambar produk | [Lihat Dokumentasi](api/products.md) |
+| 🏷️ **Category** | Manajemen kategori produk | [Lihat Dokumentasi](api/category.md) |
+| 🛒 **Shopping Cart** | Manajemen keranjang belanja | [Lihat Dokumentasi](api/shopping-cart.md) |
+| 💳 **Transaction** | Manajemen transaksi pembelian | [Lihat Dokumentasi](api/transactions.md) |
+| 📊 **Audit Trail** | Pelacakan aktivitas CRUD & audit log | [Lihat Dokumentasi](api/audit-trail.md) |
+| 🔐 **Roles & Permissions** | Sistem role-based access control | [Lihat Dokumentasi](api/roles-and-permissions.md) |
 
 ## 🚀 Fitur Utama
 

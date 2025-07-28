@@ -424,7 +424,7 @@ Accept: application/json
 
 **Endpoint:** `PUT /api/transactions/{id}`
 
-**Deskripsi:** Memperbarui status transaksi yang sudah ada. Hanya user yang membuat transaksi yang bisa mengupdate.
+**Deskripsi:** Memperbarui status dan/atau catatan transaksi yang sudah ada. Hanya admin dan moderator yang bisa mengupdate.
 
 **Headers:**
 ```
@@ -439,14 +439,17 @@ Content-Type: application/json
 **Request Body:**
 ```json
 {
-    "status": "processing"
+    "status": "processing",
+    "notes": "Catatan tambahan setelah update"
 }
 ```
 
 **Field Validations:**
-- `status` (required): string - Salah satu dari: pending, processing, shipped, delivered, cancelled, refunded
+- `status` (optional): string - Salah satu dari: pending, processing, shipped, delivered, cancelled, refunded
+- `notes` (optional): string - Catatan tambahan untuk transaksi
 
 **Stock Management:**
+- Saat mengubah status ke 'completed', stok akan dikurangi untuk semua items
 - Saat mengubah status ke 'cancelled', stok akan dikembalikan untuk semua items
 - Validasi stok akan dilakukan untuk setiap perubahan status
 
@@ -757,10 +760,19 @@ curl -X POST \
   http://localhost:8000/api/transactions \
   -H 'Authorization: Bearer YOUR_TOKEN' \
   -H 'Content-Type: application/json' \
-  -d '{
-    "product_id": 1,
-    "quantity": 2,
-    "status": "pending"
+  -d '{ \
+    "items": [ \
+      { \
+        "product_id": 1, \
+        "quantity": 2 \
+      }, \
+      { \
+        "product_id": 3, \
+        "quantity": 1 \
+      } \
+    ], \
+    "notes": "Pesanan dari API", \
+    "status": "pending" \
   }'
 ```
 

@@ -180,7 +180,7 @@ class TransactionController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $transaction = Transaction::find($id);
+        $transaction = Transaction::with('items.product')->find($id);
 
         if (!$transaction) {
             return response()->json([
@@ -189,8 +189,8 @@ class TransactionController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'quantity' => 'sometimes|integer|min:1',
             'status' => 'sometimes|in:pending,completed,cancelled',
+            'notes' => 'sometimes|nullable|string|max:500',
         ]);
 
         if ($validator->fails()) {
@@ -201,55 +201,48 @@ class TransactionController extends Controller
         }
 
         $oldValues = $transaction->toArray();
-        $product = Product::find($transaction->product_id);
 
-        if ($request->has('quantity')) {
-            $newQuantity = $request->quantity;
-            $quantityDiff = $newQuantity - $transaction->quantity;
-            
-            // Validasi stock cukup untuk penambahan quantity
-            if ($quantityDiff > 0 && $product->stock < $quantityDiff) {
-                return response()->json([
-                    'message' => 'Insufficient stock',
-                    'available_stock' => $product->stock
-                ], 422);
+        DB::transaction(function () use ($request, $transaction, $oldValues) {
+            if ($request->has('status')) {
+                $oldStatus = $transaction->status;
+                $newStatus = $request->status;
+
+                if ($oldStatus !== $newStatus) {
+                    // Jika status berubah dari pending/cancelled ke completed
+                    if (($oldStatus === 'pending' || $oldStatus === 'cancelled') && $newStatus === 'completed') {
+                        foreach ($transaction->items as $item) {
+                            $product = $item->product;
+                            if ($product) {
+                                $product->decrement('stock', $item->quantity);
+                            }
+                        }
+                    }
+                    // Jika status berubah dari completed ke cancelled
+                    else if ($oldStatus === 'completed' && $newStatus === 'cancelled') {
+                        foreach ($transaction->items as $item) {
+                            $product = $item->product;
+                            if ($product) {
+                                $product->increment('stock', $item->quantity);
+                            }
+                        }
+                    }
+                }
+                $transaction->status = $newStatus;
             }
-            
-            // Update stock berdasarkan perubahan quantity
-            $product->stock -= $quantityDiff;
-            $product->save();
-            
-            $transaction->quantity = $newQuantity;
-            $transaction->total_price = $product->price * $newQuantity;
-        }
 
-        if ($request->has('status')) {
-            $oldStatus = $transaction->status;
-            $newStatus = $request->status;
-            
-            // Kembalikan stock jika status berubah dari pending/cancelled ke completed
-            if (($oldStatus === 'pending' || $oldStatus === 'cancelled') && $newStatus === 'completed') {
-                $product->stock -= $transaction->quantity;
-                $product->save();
+            if ($request->has('notes')) {
+                $transaction->notes = $request->notes;
             }
-            
-            // Kembalikan stock jika status berubah dari completed ke cancelled
-            if ($oldStatus === 'completed' && $newStatus === 'cancelled') {
-                $product->stock += $transaction->quantity;
-                $product->save();
-            }
-            
-            $transaction->status = $newStatus;
-        }
 
-        $transaction->save();
+            $transaction->save();
 
-        // Catat aktivitas update
-        AuditTrailService::logUpdate($transaction, 'Transaction', $oldValues, $transaction->toArray(), $request);
+            // Catat aktivitas update
+            AuditTrailService::logUpdate($transaction, 'Transaction', $oldValues, $transaction->toArray(), $request);
+        });
 
         return response()->json([
             'message' => 'Transaction updated successfully',
-            'data' => $transaction->load(['user', 'product'])
+            'data' => $transaction->load(['user', 'items.product'])
         ], 200);
     }
 
@@ -261,7 +254,7 @@ class TransactionController extends Controller
      */
     public function destroy(string $id)
     {
-        $transaction = Transaction::find($id);
+        $transaction = Transaction::with('items.product')->find($id);
 
         if (!$transaction) {
             return response()->json([
@@ -269,19 +262,24 @@ class TransactionController extends Controller
             ], 404);
         }
 
-        // Kembalikan stock jika transaksi yang dihapus memiliki status completed
-        if ($transaction->status === 'completed') {
-            $product = Product::find($transaction->product_id);
-            if ($product) {
-                $product->stock += $transaction->quantity;
-                $product->save();
+        $oldValues = $transaction->toArray();
+
+        DB::transaction(function () use ($transaction, $oldValues) {
+            // Kembalikan stock jika transaksi yang dihapus memiliki status completed
+            if ($transaction->status === 'completed') {
+                foreach ($transaction->items as $item) {
+                    $product = $item->product;
+                    if ($product) {
+                        $product->increment('stock', $item->quantity);
+                    }
+                }
             }
-        }
 
-        // Catat aktivitas delete
-        AuditTrailService::logDelete($transaction, 'Transaction', $transaction->toArray(), $request);
+            // Catat aktivitas delete
+            AuditTrailService::logDelete($transaction, 'Transaction', $oldValues, request());
 
-        $transaction->delete();
+            $transaction->delete();
+        });
 
         return response()->json([
             'message' => 'Transaction deleted successfully'

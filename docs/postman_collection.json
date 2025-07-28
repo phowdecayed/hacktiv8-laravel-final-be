@@ -844,7 +844,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"product_id\": 1,\n    \"quantity\": 2,\n    \"status\": \"completed\"\n}"
+                            "raw": "{\n    \"items\": [\n        {\n            \"product_id\": 1,\n            \"quantity\": 2\n        },\n        {\n            \"product_id\": 3,\n            \"quantity\": 1\n        }\n    ],\n    \"notes\": \"Pesanan dari Postman\",\n    \"status\": \"pending\"\n}"
                         },
                         "url": {
                             "raw": "{{base_url}}/api/transactions",
@@ -977,40 +977,7 @@
                     "response": []
                 },
                 {
-                    "name": "Update Transaction",
-                    "request": {
-                        "method": "PUT",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"quantity\": 3,\n    \"status\": \"completed\"\n}"
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/api/transactions/{id}",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "transactions",
-                                "{id}"
-                            ]
-                        }
-                    },
-                    "response": [
+                    "name": "Update Transaction",                    "request": {                        "method": "PUT",                        "header": [                            {                                "key": "Accept",                                "value": "application/json"                            },                            {                                "key": "Authorization",                                "value": "Bearer {{token}}"                            },                            {                                "key": "Content-Type",                                "value": "application/json"                            }                        ],                        "body": {                            "mode": "raw",                            "raw": "{    \"status\": \"completed\",    \"notes\": \"Transaksi diperbarui dari Postman\"\n}"                        },                        "url": {                            "raw": "{{base_url}}/api/transactions/{id}",                            "host": [                                "{{base_url}}"                            ],                            "path": [                                "api",                                "transactions",                                "{id}"                            ]                        }                    },                    "response": [
                         {
                             "name": "Insufficient Stock Error",
                             "originalRequest": {
@@ -1531,6 +1498,34 @@
                                 "api",
                                 "cart",
                                 "batch"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Checkout",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/cart/checkout",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "cart",
+                                "checkout"
                             ]
                         }
                     },

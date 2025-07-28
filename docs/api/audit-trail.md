@@ -198,7 +198,7 @@ API Audit Trail digunakan untuk mencatat dan melacak semua aktivitas CRUD (Creat
 
 ### Transaction Model
 - **Tracked Actions**: create, update, delete
-- **Tracked Fields**: product_id, quantity, price, total, status
+- **Tracked Fields**: total_amount, status, notes
 - **Status Changes**: All status changes (pending, completed, cancelled) are tracked
 
 ## Security Considerations
