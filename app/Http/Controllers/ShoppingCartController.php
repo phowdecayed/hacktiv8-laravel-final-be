@@ -380,4 +380,44 @@ class ShoppingCartController extends Controller
             ]
         ], 201);
     }
+
+    /**
+     * Memvalidasi stok untuk semua item di keranjang
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function validateStock(Request $request): JsonResponse
+    {
+        $cartItems = ShoppingCart::forUser(auth()->id())->with('product')->get();
+        $insufficientStockItems = [];
+        $detailedCartItems = [];
+
+        foreach ($cartItems as $item) {
+            $itemDetails = [
+                'product_id' => $item->product->id,
+                'name' => $item->product->name,
+                'available_stock' => $item->product->stock,
+                'cart_quantity' => $item->quantity,
+            ];
+            
+            $detailedCartItems[] = $itemDetails;
+
+            if ($item->product->stock < $item->quantity) {
+                $insufficientStockItems[] = $itemDetails;
+            }
+        }
+
+        if (count($insufficientStockItems) > 0) {
+            return response()->json([
+                'message' => 'One or more items in your cart have insufficient stock.',
+                'data' => $insufficientStockItems
+            ], 422);
+        }
+
+        return response()->json([
+            'message' => 'All items in cart have sufficient stock.',
+            'data' => $detailedCartItems
+        ]);
+    }
 }

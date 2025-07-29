@@ -71,6 +71,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/', [ShoppingCartController::class, 'clear']);
         Route::post('/batch', [ShoppingCartController::class, 'batchUpdate']);
         Route::post('/checkout', [ShoppingCartController::class, 'checkout']);
+        Route::get('/validate-stock', [ShoppingCartController::class, 'validateStock']);
     });
 
     // Audit trail routes - hanya admin dan moderator
