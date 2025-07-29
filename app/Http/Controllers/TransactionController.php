@@ -189,7 +189,7 @@ class TransactionController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'status' => 'sometimes|in:pending,completed,cancelled',
+            'status' => 'sometimes|in:pending,processing,shipped,completed,cancelled,refunded',
             'notes' => 'sometimes|nullable|string|max:500',
         ]);
 
@@ -208,30 +208,13 @@ class TransactionController extends Controller
                 $newStatus = $request->status;
 
                 if ($oldStatus !== $newStatus) {
-                    // Jika status berubah dari pending ke completed, tidak ada perubahan stok
-                    if ($oldStatus === 'pending' && $newStatus === 'completed') {
-                        // Do nothing, stock already reduced
-                    }
-                    // Jika status berubah dari pending ke cancelled, kembalikan stok
-                    else if ($oldStatus === 'pending' && $newStatus === 'cancelled') {
-                        foreach ($transaction->items as $item) {
-                            $product = $item->product;
-                            if ($product) {
-                                $product->increment('stock', $item->quantity);
-                            }
-                        }
-                    }
-                    // Jika status berubah dari completed ke cancelled, kembalikan stok
-                    else if ($oldStatus === 'completed' && $newStatus === 'cancelled') {
-                        foreach ($transaction->items as $item) {
-                            $product = $item->product;
-                            if ($product) {
-                                $product->increment('stock', $item->quantity);
-                            }
-                        }
-                    }
-                    // Jika status berubah dari cancelled ke completed, kurangi stok
-                    else if ($oldStatus === 'cancelled' && $newStatus === 'completed') {
+                    // Define statuses that should trigger stock return
+                    $returnStockStatuses = ['cancelled', 'refunded'];
+                    // Define statuses that should trigger stock reduction (from a returned state)
+                    $reduceStockStatuses = ['pending', 'processing', 'shipped', 'completed'];
+
+                    // If old status was one that implies stock was returned, and new status implies stock should be reduced
+                    if (in_array($oldStatus, $returnStockStatuses) && in_array($newStatus, $reduceStockStatuses)) {
                         foreach ($transaction->items as $item) {
                             $product = $item->product;
                             if ($product) {
@@ -239,6 +222,15 @@ class TransactionController extends Controller
                                     throw new \Exception("Insufficient stock for product {$product->name}");
                                 }
                                 $product->decrement('stock', $item->quantity);
+                            }
+                        }
+                    }
+                    // If new status implies stock should be returned
+                    else if (in_array($newStatus, $returnStockStatuses) && !in_array($oldStatus, $returnStockStatuses)) {
+                        foreach ($transaction->items as $item) {
+                            $product = $item->product;
+                            if ($product) {
+                                $product->increment('stock', $item->quantity);
                             }
                         }
                     }
@@ -282,7 +274,7 @@ class TransactionController extends Controller
 
         DB::transaction(function () use ($transaction, $oldValues) {
             // Kembalikan stock jika transaksi yang dihapus memiliki status pending atau completed
-            if ($transaction->status === 'pending' || $transaction->status === 'completed') {
+            if (in_array($transaction->status, ['pending', 'processing', 'shipped', 'completed'])) {
                 foreach ($transaction->items as $item) {
                     $product = $item->product;
                     if ($product) {

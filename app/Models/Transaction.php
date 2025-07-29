@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * - id: Primary key
  * - user_id: Foreign key ke users table
  * - total_amount: Total nilai transaksi
- * - status: Status transaksi (pending, completed, cancelled)
+ * - status: Status transaksi (all, pending, processing, shipped, completed, cancelled, refunded)
  * - notes: Catatan tambahan untuk transaksi
  * 
  * Relasi:
