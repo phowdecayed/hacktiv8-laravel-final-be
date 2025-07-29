@@ -102,25 +102,29 @@ class ShoppingCartController extends Controller
             ->first();
 
         if ($existingItem) {
-            $newQuantity = $existingItem->quantity + $request->quantity;
+            // Calculate the quantity that will be added to the cart
+            $quantityToAdd = $request->quantity;
 
-            // Validasi stok tersedia
-            if ($product->stock < $newQuantity) {
+            // Calculate the total quantity in cart after this addition
+            $newTotalCartQuantity = $existingItem->quantity + $quantityToAdd;
+
+            // The stock available for this *additional* quantity is the current product stock.
+            // We need to check if the *total* quantity in cart exceeds the currently available stock.
+            if ($product->stock < $newTotalCartQuantity) {
                 return response()->json([
-                    'message' => 'Insufficient stock',
+                    'message' => 'Insufficient stock for total quantity in cart.',
                     'errors' => [
-                        'quantity' => ['The requested quantity exceeds available stock.']
+                        'quantity' => ['The total quantity in your cart exceeds available stock.']
                     ],
                     'available_stock' => $product->stock
                 ], 422);
             }
 
-            $oldQuantity = $existingItem->quantity;
-            $existingItem->quantity = $newQuantity;
+            // Update existing item quantity
+            $existingItem->quantity = $newTotalCartQuantity;
             $existingItem->save();
+
             $cartItem = $existingItem;
-            $stockChange = $newQuantity - $oldQuantity;
-            $product->decrement('stock', $stockChange); // Adjust stock based on quantity change
 
             return response()->json([
                 'message' => 'Item quantity updated in cart successfully',
@@ -138,12 +142,23 @@ class ShoppingCartController extends Controller
             ], 200);
         }
 
+        // This is for adding a brand new item to the cart
+        // Validasi stok tersedia for initial add
+        if ($product->stock < $request->quantity) {
+            return response()->json([
+                'message' => 'Insufficient stock',
+                'errors' => [
+                    'quantity' => ['The requested quantity exceeds available stock.']
+                ],
+                'available_stock' => $product->stock
+            ], 422);
+        }
+
         $cartItem = ShoppingCart::create([
             'user_id' => auth()->id(),
             'product_id' => $request->product_id,
             'quantity' => $request->quantity
         ]);
-        $product->decrement('stock', $request->quantity); // Decrement stock for new item
 
         return response()->json([
             'message' => 'Item added to cart successfully',
@@ -195,8 +210,6 @@ class ShoppingCartController extends Controller
 
         $oldQuantity = $cartItem->quantity;
         $cartItem->update(['quantity' => $request->quantity]);
-        $stockChange = $request->quantity - $oldQuantity;
-        $product->decrement('stock', $stockChange); // Adjust stock based on quantity change
 
         return response()->json([
             'message' => 'Cart item updated successfully',
@@ -223,8 +236,6 @@ class ShoppingCartController extends Controller
     public function destroy(int $id): JsonResponse
     {
         $cartItem = ShoppingCart::forUser(auth()->id())->findOrFail($id);
-        $product = $cartItem->product;
-        $product->increment('stock', $cartItem->quantity);
         $cartItem->delete();
 
         return response()->json([
@@ -239,12 +250,6 @@ class ShoppingCartController extends Controller
      */
     public function clear(): JsonResponse
     {
-        $cartItems = ShoppingCart::forUser(auth()->id())->with('product')->get();
-
-        foreach ($cartItems as $cartItem) {
-            $cartItem->product->increment('stock', $cartItem->quantity);
-        }
-
         ShoppingCart::forUser(auth()->id())->delete();
 
         return response()->json([
@@ -286,10 +291,7 @@ class ShoppingCartController extends Controller
                     throw new \Exception("Insufficient stock for product {$product->name}");
                 }
 
-                $oldQuantity = $cartItem->quantity;
                 $cartItem->update(['quantity' => $item['quantity']]);
-                $stockChange = $item['quantity'] - $oldQuantity;
-                $product->decrement('stock', $stockChange);
                 $updatedItems[] = $cartItem;
             }
         });
