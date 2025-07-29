@@ -11,7 +11,7 @@ class ProductPolicy
     /**
      * Determine whether the user can view any products.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(?User $user): bool
     {
         return true; // All roles can view products
     }
@@ -19,7 +19,7 @@ class ProductPolicy
     /**
      * Determine whether the user can view the product.
      */
-    public function view(User $user, Product $product): bool
+    public function view(?User $user, Product $product): bool
     {
         return true; // All roles can view individual products
     }

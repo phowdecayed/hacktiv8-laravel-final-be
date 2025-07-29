@@ -15,6 +15,13 @@ use App\Http\Controllers\ShoppingCartController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+// Public product and category routes
+Route::get('products', [ProductController::class, 'index']);
+Route::get('products/{product}', [ProductController::class, 'show']);
+Route::get('categories', [CategoryController::class, 'index']);
+Route::get('categories/{category}', [CategoryController::class, 'show']);
+Route::get('/storage/{filename}', [StorageController::class, 'show']);
+
 // Protected routes - memerlukan autentikasi
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
@@ -22,8 +29,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // User routes - hanya admin yang bisa manage users
     Route::middleware('role:admin')->group(function () {
-        Route::resource('users', UserController::class)->only(['index', 'show', 'update', 'destroy']);
+        Route::resource('users', UserController::class)->only(['index', 'destroy']);
     });
+    Route::resource('users', UserController::class)->only(['show', 'update']);
 
     // Storage routes - admin dan editor
     Route::middleware('role:admin,editor')->group(function () {
@@ -31,26 +39,21 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/storage', [StorageController::class, 'store']);
         Route::delete('/storage/{filename}', [StorageController::class, 'destroy']);
     });
-    Route::get('/storage/{filename}', [StorageController::class, 'show']);
 
-    // Product routes - semua user bisa view, admin dan editor bisa manage
-    Route::get('products', [ProductController::class, 'index']);
-    Route::get('products/{product}', [ProductController::class, 'show']);
+    // Product routes - admin dan editor bisa manage
     Route::middleware('role:admin,editor')->group(function () {
         Route::post('products', [ProductController::class, 'store']);
         Route::put('products/{product}', [ProductController::class, 'update']);
         Route::delete('products/{product}', [ProductController::class, 'destroy']);
     });
 
-    // Category routes - semua user bisa view, admin dan editor bisa manage
-    Route::get('categories', [CategoryController::class, 'index']);
-    Route::get('categories/{category}', [CategoryController::class, 'show']);
+    // Category routes - admin dan editor bisa manage
     Route::middleware('role:admin,editor')->group(function () {
         Route::post('categories', [CategoryController::class, 'store']);
         Route::put('categories/{category}', [CategoryController::class, 'update']);
         Route::delete('categories/{category}', [CategoryController::class, 'destroy']);
     });
-    
+
     // Transaction routes - semua user bisa create dan view own, admin dan moderator bisa manage all
     Route::get('transactions', [TransactionController::class, 'index'])->middleware('role:admin,moderator');
     Route::get('transactions/{transaction}', [TransactionController::class, 'show'])->middleware('role:admin,moderator');
@@ -58,7 +61,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('transactions/{transaction}', [TransactionController::class, 'update'])->middleware('role:admin,moderator');
     Route::delete('transactions/{transaction}', [TransactionController::class, 'destroy'])->middleware('role:admin,moderator');
     Route::get('my-transactions', [TransactionController::class, 'myTransactions']);
-    
+
     // Shopping cart routes - semua user bisa manage cart sendiri
     Route::prefix('cart')->group(function () {
         Route::get('/', [ShoppingCartController::class, 'index']);

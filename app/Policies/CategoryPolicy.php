@@ -11,7 +11,7 @@ class CategoryPolicy
     /**
      * Determine whether the user can view any categories.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(?User $user): bool
     {
         return true; // All roles can view categories
     }
@@ -19,7 +19,7 @@ class CategoryPolicy
     /**
      * Determine whether the user can view the category.
      */
-    public function view(User $user, Category $category): bool
+    public function view(?User $user, Category $category): bool
     {
         return true; // All roles can view individual categories
     }

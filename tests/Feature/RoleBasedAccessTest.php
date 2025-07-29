@@ -48,8 +48,9 @@ class RoleBasedAccessTest extends TestCase
                 'name' => 'Test Product',
                 'description' => 'Test Description',
                 'price' => 100000,
+                'stock' => 10,
                 'category_id' => $category->id,
-                'image' => 'test.jpg'
+                'images' => [\Illuminate\Http\UploadedFile::fake()->image('test.jpg')]
             ]);
 
         $response->assertStatus(201);
