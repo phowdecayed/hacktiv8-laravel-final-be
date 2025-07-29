@@ -115,9 +115,12 @@ class ShoppingCartController extends Controller
                 ], 422);
             }
 
+            $oldQuantity = $existingItem->quantity;
             $existingItem->quantity = $newQuantity;
             $existingItem->save();
             $cartItem = $existingItem;
+            $stockChange = $newQuantity - $oldQuantity;
+            $product->decrement('stock', $stockChange); // Adjust stock based on quantity change
 
             return response()->json([
                 'message' => 'Item quantity updated in cart successfully',
@@ -140,6 +143,7 @@ class ShoppingCartController extends Controller
             'product_id' => $request->product_id,
             'quantity' => $request->quantity
         ]);
+        $product->decrement('stock', $request->quantity); // Decrement stock for new item
 
         return response()->json([
             'message' => 'Item added to cart successfully',
@@ -189,7 +193,10 @@ class ShoppingCartController extends Controller
             ], 422);
         }
 
+        $oldQuantity = $cartItem->quantity;
         $cartItem->update(['quantity' => $request->quantity]);
+        $stockChange = $request->quantity - $oldQuantity;
+        $product->decrement('stock', $stockChange); // Adjust stock based on quantity change
 
         return response()->json([
             'message' => 'Cart item updated successfully',
@@ -216,6 +223,8 @@ class ShoppingCartController extends Controller
     public function destroy(int $id): JsonResponse
     {
         $cartItem = ShoppingCart::forUser(auth()->id())->findOrFail($id);
+        $product = $cartItem->product;
+        $product->increment('stock', $cartItem->quantity);
         $cartItem->delete();
 
         return response()->json([
@@ -230,6 +239,12 @@ class ShoppingCartController extends Controller
      */
     public function clear(): JsonResponse
     {
+        $cartItems = ShoppingCart::forUser(auth()->id())->with('product')->get();
+
+        foreach ($cartItems as $cartItem) {
+            $cartItem->product->increment('stock', $cartItem->quantity);
+        }
+
         ShoppingCart::forUser(auth()->id())->delete();
 
         return response()->json([
@@ -271,7 +286,10 @@ class ShoppingCartController extends Controller
                     throw new \Exception("Insufficient stock for product {$product->name}");
                 }
 
+                $oldQuantity = $cartItem->quantity;
                 $cartItem->update(['quantity' => $item['quantity']]);
+                $stockChange = $item['quantity'] - $oldQuantity;
+                $product->decrement('stock', $stockChange);
                 $updatedItems[] = $cartItem;
             }
         });
