@@ -96,18 +96,12 @@ class ShoppingCartController extends Controller
             ], 422);
         }
 
-        // Cek apakah item sudah ada di keranjang, termasuk yang sudah di-soft-delete
+        // Cek apakah item sudah ada di keranjang
         $existingItem = ShoppingCart::forUser(auth()->id())
             ->where('product_id', $request->product_id)
-            ->withTrashed() // Cek juga yang sudah di-soft-delete
             ->first();
 
         if ($existingItem) {
-            // Jika item sudah ada dan di-soft-delete, pulihkan dan update quantity
-            if ($existingItem->trashed()) {
-                $existingItem->restore();
-            }
-            
             $newQuantity = $existingItem->quantity + $request->quantity;
 
             // Validasi stok tersedia
@@ -183,12 +177,7 @@ class ShoppingCartController extends Controller
             ], 422);
         }
 
-        $cartItem = ShoppingCart::forUser(auth()->id())->withTrashed()->findOrFail($id);
-
-        // Jika item di-soft-delete, pulihkan
-        if ($cartItem->trashed()) {
-            $cartItem->restore();
-        }
+        $cartItem = ShoppingCart::forUser(auth()->id())->findOrFail($id);
         
         $product = $cartItem->product;
 
