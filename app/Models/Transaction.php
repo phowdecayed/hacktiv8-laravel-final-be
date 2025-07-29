@@ -91,4 +91,15 @@ class Transaction extends Model
     {
         return $query->with(['items.product']);
     }
+
+    /**
+     * Set the transaction's status.
+     *
+     * @param  string  $value
+     * @return void
+     */
+    public function setStatusAttribute(string $value): void
+    {
+        $this->attributes['status'] = $value;
+    }
 }
