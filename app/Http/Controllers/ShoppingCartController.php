@@ -96,15 +96,49 @@ class ShoppingCartController extends Controller
             ], 422);
         }
 
-        // Cek apakah item sudah ada di keranjang
+        // Cek apakah item sudah ada di keranjang, termasuk yang sudah di-soft-delete
         $existingItem = ShoppingCart::forUser(auth()->id())
             ->where('product_id', $request->product_id)
+            ->withTrashed() // Cek juga yang sudah di-soft-delete
             ->first();
 
         if ($existingItem) {
+            // Jika item sudah ada dan di-soft-delete, pulihkan dan update quantity
+            if ($existingItem->trashed()) {
+                $existingItem->restore();
+            }
+            
+            $newQuantity = $existingItem->quantity + $request->quantity;
+
+            // Validasi stok tersedia
+            if ($product->stock < $newQuantity) {
+                return response()->json([
+                    'message' => 'Insufficient stock',
+                    'errors' => [
+                        'quantity' => ['The requested quantity exceeds available stock.']
+                    ],
+                    'available_stock' => $product->stock
+                ], 422);
+            }
+
+            $existingItem->quantity = $newQuantity;
+            $existingItem->save();
+            $cartItem = $existingItem;
+
             return response()->json([
-                'message' => 'Item already exists in cart. Use update endpoint to change quantity.'
-            ], 422);
+                'message' => 'Item quantity updated in cart successfully',
+                'data' => [
+                    'id' => $cartItem->id,
+                    'product' => [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'price' => $product->price,
+                        'stock' => $product->stock
+                    ],
+                    'quantity' => $cartItem->quantity,
+                    'total_price' => $cartItem->quantity * $product->price
+                ]
+            ], 200);
         }
 
         $cartItem = ShoppingCart::create([
@@ -149,7 +183,13 @@ class ShoppingCartController extends Controller
             ], 422);
         }
 
-        $cartItem = ShoppingCart::forUser(auth()->id())->findOrFail($id);
+        $cartItem = ShoppingCart::forUser(auth()->id())->withTrashed()->findOrFail($id);
+
+        // Jika item di-soft-delete, pulihkan
+        if ($cartItem->trashed()) {
+            $cartItem->restore();
+        }
+        
         $product = $cartItem->product;
 
         // Validasi stok tersedia
