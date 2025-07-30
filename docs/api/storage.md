@@ -17,7 +17,7 @@ Dokumentasi lengkap untuk manajemen file dan penyimpanan dalam sistem.
 | Method | Endpoint | Deskripsi |
 |--------|----------|-----------|
 | GET | `/api/storage` | Mendapatkan daftar file user |
-| POST | `/api/storage/upload` | Upload file baru |
+| POST | `/api/storage` | Upload file baru |
 | GET | `/api/storage/{filename}` | Download file |
 | DELETE | `/api/storage/{filename}` | Hapus file (soft delete) |
 
@@ -91,52 +91,70 @@ Accept: application/json
 **Query Parameters (optional):**
 - `search`: Search berdasarkan nama file
 - `type`: Filter berdasarkan tipe file (image, document, archive, text)
-- `sort`: Sort berdasarkan kolom (filename, size, created_at)
+- `sort`: Sort berdasarkan kolom (filename, size, created_at, updated_at)
 - `order`: Urutan sort (asc, desc)
+- `user_id`: Filter berdasarkan ID user
+- `limit`: Jumlah data per halaman (1-100) - default: 15
 
 **Response Success (200):**
 ```json
 {
-    "data": [
-        {
-            "id": 1,
-            "filename": "product_image_123.jpg",
-            "original_name": "laptop_gaming.jpg",
-            "mime_type": "image/jpeg",
-            "size": 2048576,
-            "user_id": 1,
-            "created_at": "2024-01-15T08:00:00.000000Z",
-            "updated_at": "2024-01-15T08:00:00.000000Z",
-            "deleted_at": null,
-            "user": {
+    "message": "Files retrieved successfully",
+    "data": {
+        "current_page": 1,
+        "data": [
+            {
                 "id": 1,
-                "name": "Admin User",
-                "email": "admin@example.com"
+                "filename": "product_image_123.jpg",
+                "original_name": "laptop_gaming.jpg",
+                "mime_type": "image/jpeg",
+                "size": 2048576,
+                "user_id": 1,
+                "created_at": "2024-01-15T08:00:00.000000Z",
+                "updated_at": "2024-01-15T08:00:00.000000Z",
+                "deleted_at": null,
+                "user": {
+                    "id": 1,
+                    "name": "Admin User",
+                    "email": "admin@example.com"
+                },
+                "file_url": "http://localhost:8000/storage/product_image_123.jpg"
+            },
+            {
+                "id": 2,
+                "filename": "report_2024.pdf",
+                "original_name": "monthly_report.pdf",
+                "mime_type": "application/pdf",
+                "size": 5120000,
+                "user_id": 1,
+                "created_at": "2024-01-15T09:00:00.000000Z",
+                "updated_at": "2024-01-15T09:00:00.000000Z",
+                "deleted_at": null,
+                "user": {
+                    "id": 1,
+                    "name": "Admin User",
+                    "email": "admin@example.com"
+                },
+                "file_url": "http://localhost:8000/storage/report_2024.pdf"
             }
-        },
-        {
-            "id": 2,
-            "filename": "report_2024.pdf",
-            "original_name": "monthly_report.pdf",
-            "mime_type": "application/pdf",
-            "size": 5120000,
-            "user_id": 1,
-            "created_at": "2024-01-15T09:00:00.000000Z",
-            "updated_at": "2024-01-15T09:00:00.000000Z",
-            "deleted_at": null,
-            "user": {
-                "id": 1,
-                "name": "Admin User",
-                "email": "admin@example.com"
-            }
-        }
-    ]
+        ],
+        "first_page_url": "http://localhost:8000/api/storage?page=1",
+        "from": 1,
+        "last_page": 1,
+        "last_page_url": "http://localhost:8000/api/storage?page=1",
+        "next_page_url": null,
+        "path": "http://localhost:8000/api/storage",
+        "per_page": 15,
+        "prev_page_url": null,
+        "to": 2,
+        "total": 2
+    }
 }
 ```
 
 ### 2. Upload File
 
-**Endpoint:** `POST /api/storage/upload`
+**Endpoint:** `POST /api/storage`
 
 **Deskripsi:** Upload file baru dengan validasi tipe dan ukuran file.
 
@@ -149,14 +167,15 @@ Content-Type: multipart/form-data
 **Request Body:**
 - `file` (required): file - File yang akan diupload
 - `folder` (optional): string - Subfolder untuk organisasi file
+- `folder` (optional): string - Subfolder untuk organisasi file
 
 **File Validation Rules:**
 - **Max Size:** 20MB total
 - **Allowed Types:**
-  - Images: jpg, jpeg, png, gif, webp, svg (max 5MB)
-  - Documents: pdf, doc, docx, xls, xlsx, ppt, pptx (max 10MB)
-  - Archives: zip, rar, 7z (max 20MB)
-  - Text: txt, csv, json, xml (max 2MB)
+  - Images: jpg, jpeg, png, gif, webp, svg
+  - Documents: pdf, doc, docx, xls, xlsx, ppt, pptx
+  - Archives: zip, rar, 7z
+  - Text: txt, csv, json, xml
 
 **Response Success (201):**
 ```json
@@ -215,14 +234,21 @@ Accept: application/json
 - `filename` (required): string - Nama file yang akan didownload
 
 **Response Success (200):**
-- **Content-Type:** Sesuai dengan tipe file (image/jpeg, application/pdf, dll)
-- **Content-Disposition:** attachment; filename="original_name"
+- **Content-Type:** `application/octet-stream` (or specific MIME type like `image/jpeg`, `application/pdf`, etc.)
+- **Content-Disposition:** `attachment; filename="original_name.ext"`
 - **Body:** Binary file content
 
 **Response Error (404 - Not Found):**
 ```json
 {
     "message": "File not found"
+}
+```
+
+**Response Error (403 - Forbidden):**
+```json
+{
+    "message": "You do not have permission to access this file"
 }
 ```
 
@@ -269,6 +295,13 @@ Accept: application/json
 }
 ```
 
+**Response Error (403 - Forbidden):**
+```json
+{
+    "message": "You do not have permission to delete this file"
+}
+```
+
 ## 🗂️ File Storage Structure
 
 ### Directory Organization
@@ -297,10 +330,11 @@ storage/
 ### Upload Product Image
 ```bash
 curl -X POST \
-  http://localhost:8000/api/storage/upload \
+  http://localhost:8000/api/storage \
   -H 'Authorization: Bearer YOUR_TOKEN' \
   -F 'file=@/path/to/product_image.jpg'
 ```
+
 
 ### Download Document
 ```bash

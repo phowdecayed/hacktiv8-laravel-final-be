@@ -66,6 +66,7 @@ class CategoryController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255|unique:categories',
+            'description' => 'nullable|string|max:1000',
         ]);
 
         if ($validator->fails()) {
@@ -74,13 +75,17 @@ class CategoryController extends Controller
 
         $category = Category::create([
             'name' => $request->name,
+            'description' => $request->description,
             'user_id' => auth()->id(),
         ]);
 
         // Catat aktivitas create
         AuditTrailService::logCreate($category, 'Category', $request);
 
-        return response()->json($category, 201);
+        return response()->json([
+            'message' => 'Category created successfully',
+            'data' => $category
+        ], 201);
     }
 
     /**
@@ -92,7 +97,10 @@ class CategoryController extends Controller
         if (!$category) {
             return response()->json(['message' => 'Category not found'], 404);
         }
-        return response()->json($category);
+        return response()->json([
+            'message' => 'Category updated successfully',
+            'data' => $category
+        ]);
     }
 
     /**
@@ -125,7 +133,10 @@ class CategoryController extends Controller
         // Catat aktivitas update
         AuditTrailService::logUpdate($category, 'Category', $oldValues, $category->toArray(), $request);
 
-        return response()->json($category);
+        return response()->json([
+            'message' => 'Category updated successfully',
+            'data' => $category
+        ]);
     }
 
     /**

@@ -1,0 +1,220 @@
+{
+    "info": {
+        "_postman_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+        "name": "Hacktiv8 Laravel Final API - Audit Trail",
+        "description": "Audit Trail API collection for Hacktiv8 Laravel Final Project",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Get All Audit Trails",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/audit-trails?model_type=Product&action=created&user_id=1&date_from=2024-01-01&date_to=2024-12-31&sort=created_at&order=desc&limit=20",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "audit-trails"
+                    ],
+                    "query": [
+                        {
+                            "key": "model_type",
+                            "value": "Product",
+                            "description": "Filter by model type: Product, Category, Transaction"
+                        },
+                        {
+                            "key": "action",
+                            "value": "created",
+                            "description": "Filter by action: created, updated, deleted, restored"
+                        },
+                        {
+                            "key": "user_id",
+                            "value": "1",
+                            "description": "Filter by user ID"
+                        },
+                        {
+                            "key": "date_from",
+                            "value": "2024-01-01",
+                            "description": "Filter from date (YYYY-MM-DD)"
+                        },
+                        {
+                            "key": "date_to",
+                            "value": "2024-12-31",
+                            "description": "Filter to date (YYYY-MM-DD)"
+                        },
+                        {
+                            "key": "sort",
+                            "value": "created_at",
+                            "description": "Sort by field: created_at, updated_at"
+                        },
+                        {
+                            "key": "order",
+                            "value": "desc",
+                            "description": "Sort order: asc or desc"
+                        },
+                        {
+                            "key": "limit",
+                            "value": "20",
+                            "description": "Number of results per page (1-100)"
+                        }
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Get Audit Trail by ID",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/audit-trails/{id}",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "audit-trails",
+                        "{id}"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Get Audit Trails for Specific Model",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/audit-trails/model/Product/1?limit=20",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "audit-trails",
+                        "model",
+                        "Product",
+                        "1"
+                    ],
+                    "query": [
+                        {
+                            "key": "limit",
+                            "value": "20",
+                            "description": "Number of results per page (1-100)"
+                        }
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Get My Audit Trails",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/my-audit-trails?model_type=Product&action=created&date_from=2024-01-01&date_to=2024-12-31&sort=created_at&order=desc&limit=20",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "my-audit-trails"
+                    ],
+                    "query": [
+                        {
+                            "key": "model_type",
+                            "value": "Product",
+                            "description": "Filter by model type: Product, Category, Transaction"
+                        },
+                        {
+                            "key": "action",
+                            "value": "created",
+                            "description": "Filter by action: created, updated, deleted, restored"
+                        },
+                        {
+                            "key": "date_from",
+                            "value": "2024-01-01",
+                            "description": "Filter from date (YYYY-MM-DD)"
+                        },
+                        {
+                            "key": "date_to",
+                            "value": "2024-12-31",
+                            "description": "Filter to date (YYYY-MM-DD)"
+                        },
+                        {
+                            "key": "sort",
+                            "value": "created_at",
+                            "description": "Sort by field: created_at, updated_at"
+                        },
+                        {
+                            "key": "order",
+                            "value": "desc",
+                            "description": "Sort order: asc or desc"
+                        },
+                        {
+                            "key": "limit",
+                            "value": "20",
+                            "description": "Number of results per page (1-100)"
+                        }
+                    ]
+                }
+            },
+            "response": []
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8000",
+            "type": "string"
+        },
+        {
+            "key": "token",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}

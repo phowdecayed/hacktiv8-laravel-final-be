@@ -1,0 +1,310 @@
+{
+    "info": {
+        "_postman_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+        "name": "Hacktiv8 Laravel Final API - Transactions",
+        "description": "Transactions API collection for Hacktiv8 Laravel Final Project. This version uses standardized path variables and placeholder data for improved usability.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Get All Transactions",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/transactions",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "transactions"
+                    ],
+                    "query": [
+                        {
+                            "key": "user_id",
+                            "value": "",
+                            "description": "Filter by user ID (Admin only).",
+                            "disabled": true
+                        },
+                        {
+                            "key": "status",
+                            "value": "",
+                            "description": "Filter by status: pending, completed, cancelled.",
+                            "disabled": true
+                        },
+                        {
+                            "key": "date_from",
+                            "value": "",
+                            "description": "Filter transactions from this date (YYYY-MM-DD).",
+                            "disabled": true
+                        },
+                        {
+                            "key": "date_to",
+                            "value": "",
+                            "description": "Filter transactions until this date (YYYY-MM-DD).",
+                            "disabled": true
+                        },
+                        {
+                            "key": "sort",
+                            "value": "created_at",
+                            "description": "Sort by field: created_at, total_amount, status.",
+                            "disabled": true
+                        },
+                        {
+                            "key": "order",
+                            "value": "desc",
+                            "description": "Sort order: asc or desc.",
+                            "disabled": true
+                        }
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Create Transaction (from Cart)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"notes\": \"<string> (optional)\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/transactions",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "transactions"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Get Transaction Details",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/transactions/:transactionId",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "transactions",
+                        ":transactionId"
+                    ],
+                    "variable": [
+                        {
+                            "key": "transactionId",
+                            "value": "1",
+                            "description": "The ID of the transaction to retrieve."
+                        }
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Update Transaction Status",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"status\": \"completed\",\n    \"notes\": \"<string> (optional)\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/transactions/:transactionId",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "transactions",
+                        ":transactionId"
+                    ],
+                    "variable": [
+                        {
+                            "key": "transactionId",
+                            "value": "1",
+                            "description": "The ID of the transaction to update."
+                        }
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Delete Transaction",
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/transactions/:transactionId",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "transactions",
+                        ":transactionId"
+                    ],
+                    "variable": [
+                        {
+                            "key": "transactionId",
+                            "value": "1",
+                            "description": "The ID of the transaction to delete."
+                        }
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Get My Transactions",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/my-transactions",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "my-transactions"
+                    ],
+                    "query": [
+                        {
+                            "key": "status",
+                            "value": "",
+                            "description": "Filter by status: pending, completed, cancelled.",
+                            "disabled": true
+                        },
+                        {
+                            "key": "date_from",
+                            "value": "",
+                            "description": "Filter transactions from this date (YYYY-MM-DD).",
+                            "disabled": true
+                        },
+                        {
+                            "key": "date_to",
+                            "value": "",
+                            "description": "Filter transactions until this date (YYYY-MM-DD).",
+                            "disabled": true
+                        },
+                        {
+                            "key": "sort",
+                            "value": "created_at",
+                            "description": "Sort by field: total_price, created_at, status.",
+                            "disabled": true
+                        },
+                        {
+                            "key": "order",
+                            "value": "desc",
+                            "description": "Sort order: asc or desc.",
+                            "disabled": true
+                        },
+                        {
+                            "key": "limit",
+                            "value": "15",
+                            "description": "Number of results per page.",
+                            "disabled": true
+                        }
+                    ]
+                }
+            },
+            "response": []
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8000",
+            "type": "string"
+        },
+        {
+            "key": "token",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}

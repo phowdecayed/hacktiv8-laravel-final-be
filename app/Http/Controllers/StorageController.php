@@ -2,69 +2,48 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\StorageFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class StorageController extends Controller
 {
-    /**
-     * Display a listing of the resource with query parameters.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function index(Request $request)
     {
-        // Query builder dengan eager loading
         $query = StorageFile::with('user');
 
-        // Pencarian berdasarkan nama file atau original name
         if ($request->has('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
-                $q->where('file_name', 'like', "%{$search}%")
+                $q->where('filename', 'like', "%{$search}%")
                   ->orWhere('original_name', 'like', "%{$search}%");
             });
         }
 
-        // Filter berdasarkan tipe file
         if ($request->has('type')) {
-            $query->where('file_type', 'like', "%{$request->type}%");
+            $type = $request->type;
+            $query->where('mime_type', 'like', "%{$type}%");
         }
 
-        // Filter berdasarkan user_id
         if ($request->has('user_id')) {
             $query->where('user_id', $request->user_id);
         }
 
-        // Filter berdasarkan tanggal
-        if ($request->has('date_from')) {
-            $query->whereDate('created_at', '>=', $request->date_from);
-        }
-        
-        if ($request->has('date_to')) {
-            $query->whereDate('created_at', '<=', $request->date_to);
-        }
-
-        // Sorting
         $sort = $request->get('sort', 'created_at');
         $order = $request->get('order', 'asc');
         
-        // Validasi kolom yang bisa di-sort
-        $allowedSorts = ['file_name', 'file_type', 'file_size', 'created_at', 'updated_at'];
+        $allowedSorts = ['filename', 'size', 'created_at', 'updated_at'];
         if (in_array($sort, $allowedSorts)) {
             $query->orderBy($sort, $order === 'desc' ? 'desc' : 'asc');
         }
 
-        // Pagination
         $limit = $request->get('limit', 15);
-        $limit = min($limit, 100); // Maksimal 100 item per halaman
+        $limit = min($limit, 100);
 
         $files = $query->paginate($limit);
 
-        // Transform URLs untuk file URLs
         $files->getCollection()->transform(function($file) {
-            $file->file_url = Storage::url($file->file_path);
+            $file->file_url = Storage::url($file->filename);
             return $file;
         });
 
@@ -77,25 +56,58 @@ class StorageController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'file' => 'required|image',
+            'file' => [
+                'required',
+                'file',
+                'mimes:jpg,jpeg,png,gif,webp,svg,pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar,7z,txt,csv,json,xml',
+                'max:20480', // 20MB in kilobytes
+            ],
+            'folder' => 'nullable|string',
         ]);
 
-        $path = $request->file('file')->store('/', 'public');
+        $file = $request->file('file');
+        $originalName = $file->getClientOriginalName();
+        $mimeType = $file->getMimeType();
+        $size = $file->getSize();
+        $userId = Auth::id();
+
+        $path = $file->store('public/user_' . $userId . '/' . ($request->folder ?? ''), 'local');
+        $filename = str_replace('public/', '', $path);
+
+        $storageFile = StorageFile::create([
+            'filename' => $filename,
+            'original_name' => $originalName,
+            'mime_type' => $mimeType,
+            'size' => $size,
+            'user_id' => $userId,
+        ]);
 
         return response()->json([
-            'path' => $path,
-            'url' => Storage::url($path),
+            'message' => 'File uploaded successfully',
+            'data' => $storageFile
         ], 201);
     }
 
     public function show($filename)
     {
-        return Storage::disk('public')->download($filename);
+        $file = StorageFile::where('filename', $filename)->firstOrFail();
+
+        if ($file->user_id !== Auth::id()) {
+            abort(403, 'You do not have permission to access this file');
+        }
+
+        return Storage::disk('local')->download('public/' . $file->filename, $file->original_name);
     }
 
     public function destroy($filename)
     {
-        Storage::disk('public')->delete($filename);
+        $file = StorageFile::where('filename', $filename)->firstOrFail();
+
+        if ($file->user_id !== Auth::id()) {
+            abort(403, 'You do not have permission to delete this file');
+        }
+
+        $file->delete(); // Soft delete
 
         return response()->json(['message' => 'File deleted successfully'], 200);
     }

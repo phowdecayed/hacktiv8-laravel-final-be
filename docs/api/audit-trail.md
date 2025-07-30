@@ -63,9 +63,25 @@ API Audit Trail digunakan untuk mencatat dan melacak semua aktivitas CRUD (Creat
       }
     }
   ],
-  "total": 50,
+  "first_page_url": "http://localhost:8000/api/audit-trails?page=1",
+  "from": 1,
+  "last_page": 3,
+  "last_page_url": "http://localhost:8000/api/audit-trails?page=3",
+  "next_page_url": "http://localhost:8000/api/audit-trails?page=2",
+  "path": "http://localhost:8000/api/audit-trails",
   "per_page": 20,
-  "last_page": 3
+  "prev_page_url": null,
+  "to": 20,
+  "total": 50
+}
+```
+
+**Response Error (400 - Bad Request):**
+```json
+{
+    "date_from": [
+        "The date from does not match the format Y-m-d."
+    ]
 }
 ```
 
@@ -94,6 +110,7 @@ API Audit Trail digunakan untuk mencatat dan melacak semua aktivitas CRUD (Creat
   "ip_address": "192.168.1.100",
   "user_agent": "Mozilla/5.0...",
   "created_at": "2024-07-28T13:00:00.000000Z",
+  "updated_at": "2024-07-28T13:00:00.000000Z",
   "user": {
     "id": 1,
     "name": "John Doe",
@@ -136,12 +153,24 @@ API Audit Trail digunakan untuk mencatat dan melacak semua aktivitas CRUD (Creat
       "ip_address": "192.168.1.100",
       "user_agent": "Mozilla/5.0...",
       "created_at": "2024-07-28T13:00:00.000000Z",
+      "updated_at": "2024-07-28T13:00:00.000000Z",
       "user": {
         "id": 1,
-        "name": "John Doe"
+        "name": "John Doe",
+        "email": "john@example.com"
       }
     }
-  ]
+  ],
+  "first_page_url": "http://localhost:8000/api/audit-trails/model/Product/1?page=1",
+  "from": 1,
+  "last_page": 1,
+  "last_page_url": "http://localhost:8000/api/audit-trails/model/Product/1?page=1",
+  "next_page_url": null,
+  "path": "http://localhost:8000/api/audit-trails/model/Product/1",
+  "per_page": 20,
+  "prev_page_url": null,
+  "to": 1,
+  "total": 1
 }
 ```
 
@@ -178,9 +207,34 @@ API Audit Trail digunakan untuk mencatat dan melacak semua aktivitas CRUD (Creat
       },
       "ip_address": "192.168.1.100",
       "user_agent": "Mozilla/5.0...",
-      "created_at": "2024-07-28T13:00:00.000000Z"
+      "created_at": "2024-07-28T13:00:00.000000Z",
+      "updated_at": "2024-07-28T13:00:00.000000Z",
+      "user": {
+        "id": 1,
+        "name": "John Doe",
+        "email": "john@example.com"
+      }
     }
-  ]
+  ],
+  "first_page_url": "http://localhost:8000/api/my-audit-trails?page=1",
+  "from": 1,
+  "last_page": 1,
+  "last_page_url": "http://localhost:8000/api/my-audit-trails?page=1",
+  "next_page_url": null,
+  "path": "http://localhost:8000/api/my-audit-trails",
+  "per_page": 20,
+  "prev_page_url": null,
+  "to": 1,
+  "total": 1
+}
+```
+
+**Response Error (400 - Bad Request):**
+```json
+{
+    "date_from": [
+        "The date from does not match the format Y-m-d."
+    ]
 }
 ```
 

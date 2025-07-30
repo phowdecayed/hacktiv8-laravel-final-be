@@ -169,15 +169,27 @@ class ProductController extends Controller
         AuditTrailService::logUpdate($product, 'Product', $oldValues, $product->toArray(), $request);
 
         if ($request->hasFile('images')) {
-            // Delete existing images
-            foreach ($product->images as $image) {
-                Storage::disk('public')->delete($image->image_path);
-                $image->delete();
+            $newImages = collect($request->file('images'));
+            $existingImages = $product->images;
+
+            // Delete images that are not in the new set
+            foreach ($existingImages as $existingImage) {
+                $found = false;
+                foreach ($newImages as $newImage) {
+                    if ($existingImage->original_name === $newImage->getClientOriginalName()) {
+                        $found = true;
+                        break;
+                    }
+                }
+                if (!$found) {
+                    Storage::disk('public')->delete($existingImage->image_path);
+                    $existingImage->delete();
+                }
             }
 
-            // Store new images
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('product_images', 'public');
+            // Add new images
+            foreach ($newImages as $newImage) {
+                $path = $newImage->store('product_images', 'public');
                 ProductImage::create([
                     'product_id' => $product->id,
                     'image_path' => $path,
@@ -201,9 +213,8 @@ class ProductController extends Controller
 
         $oldValues = $product->toArray();
 
-        // Delete associated images
+        // Soft delete associated images
         foreach ($product->images as $image) {
-            Storage::disk('public')->delete($image->image_path);
             $image->delete();
         }
 

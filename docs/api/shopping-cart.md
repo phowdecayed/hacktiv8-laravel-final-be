@@ -57,45 +57,33 @@ Accept: application/json
 
 **Query Parameters:**
 - `sort` (optional): string - Sort by: created_at, updated_at, price, quantity (default: created_at)
-- `order` (optional): string - Order direction: asc, desc (default: asc)
+- `order` (optional): string - Order direction: asc, desc (default: desc)
 - `limit` (optional): integer - Jumlah item per halaman (default: 15, max: 100)
 
 **Response Success (200):**
 ```json
 {
-  "message": "Shopping cart items retrieved successfully",
-  "data": {
-    "data": [
-      {
+  "data": [
+    {
+      "id": 1,
+      "product": {
         "id": 1,
-        "user_id": 1,
-        "product_id": 1,
-        "quantity": 2,
+        "name": "Laptop Gaming",
         "price": 150000,
-        "total": 300000,
-        "created_at": "2024-07-28T10:00:00.000000Z",
-        "updated_at": "2024-07-28T10:30:00.000000Z",
-        "product": {
-          "id": 1,
-          "name": "Laptop Gaming",
-          "description": "High performance gaming laptop",
-          "price": 150000,
-          "stock": 10,
-          "category": {
-            "id": 1,
-            "name": "Electronics"
-          },
-          "images": [
-            {
-              "id": 1,
-              "image_path": "http://localhost:8000/storage/product_images/laptop1.jpg"
-            }
-          ]
-        }
-      }
-    ],
-    "total": 300000,
-    "item_count": 1
+        "stock": 10,
+        "image": "http://localhost:8000/storage/product_images/laptop1.jpg"
+      },
+      "quantity": 2,
+      "total_price": 300000,
+      "created_at": "2024-07-28T10:00:00.000000Z",
+      "updated_at": "2024-07-28T10:30:00.000000Z"
+    }
+  ],
+  "pagination": {
+    "current_page": 1,
+    "per_page": 15,
+    "total": 1,
+    "last_page": 1
   }
 }
 ```
@@ -127,22 +115,35 @@ Content-Type: application/json
 **Response Success (201):**
 ```json
 {
-  "message": "Item added to shopping cart successfully",
+  "message": "Item added to cart successfully",
   "data": {
     "id": 1,
-    "user_id": 1,
-    "product_id": 1,
-    "quantity": 2,
-    "price": 150000,
-    "total": 300000,
-    "created_at": "2024-07-28T10:00:00.000000Z",
-    "updated_at": "2024-07-28T10:00:00.000000Z",
     "product": {
       "id": 1,
       "name": "Laptop Gaming",
       "price": 150000,
       "stock": 10
-    }
+    },
+    "quantity": 2,
+    "total_price": 300000
+  }
+}
+```
+
+**Response Success (200 - Item already exists):**
+```json
+{
+  "message": "Item quantity updated in cart successfully",
+  "data": {
+    "id": 1,
+    "product": {
+      "id": 1,
+      "name": "Laptop Gaming",
+      "price": 150000,
+      "stock": 10
+    },
+    "quantity": 3,
+    "total_price": 450000
   }
 }
 ```
@@ -170,14 +171,18 @@ Content-Type: application/json
 **Response Error - Duplicate Item (422):**
 ```json
 {
-  "message": "Item already exists in cart. Use update endpoint to change quantity."
+  "message": "Insufficient stock for total quantity in cart.",
+  "errors": {
+    "quantity": ["The total quantity in your cart exceeds available stock."]
+  },
+  "available_stock": 5
 }
 ```
 
 ### 3. Update Cart Item
 Memperbarui quantity item dalam keranjang.
 
-**Endpoint:** `PUT /api/cart/{id}`
+**Endpoint:** `PUT /api/cart/{cart}`
 
 **Headers:**
 ```
@@ -217,7 +222,8 @@ Content-Type: application/json
       "name": "Laptop Gaming",
       "price": 150000,
       "stock": 10
-    }
+    },
+    "total_price": 750000
   }
 }
 ```
@@ -233,7 +239,7 @@ Content-Type: application/json
 ### 4. Remove Item from Cart
 Menghapus item dari keranjang belanja.
 
-**Endpoint:** `DELETE /api/cart/{id}`
+**Endpoint:** `DELETE /api/cart/{cart}`
 
 **Headers:**
 ```
@@ -247,7 +253,7 @@ Accept: application/json
 **Response Success (200):**
 ```json
 {
-  "message": "Item removed from shopping cart successfully"
+  "message": "Item removed from cart successfully"
 }
 ```
 
@@ -265,15 +271,14 @@ Accept: application/json
 **Response Success (200):**
 ```json
 {
-  "message": "Shopping cart cleared successfully",
-  "cleared_items": 3
+  "message": "Shopping cart cleared successfully"
 }
 ```
 
 ### 6. Update Cart Items in Batch
 Memperbarui quantity multiple item sekaligus.
 
-**Endpoint:** `PUT /api/cart/batch`
+**Endpoint:** `POST /api/cart/batch`
 
 **Headers:**
 ```
@@ -306,12 +311,114 @@ Content-Type: application/json
 **Response Success (200):**
 ```json
 {
-  "message": "Batch update completed successfully",
+  "message": "Cart items updated successfully",
+  "data": [
+    {
+      "id": 1,
+      "product": {
+        "id": 1,
+        "name": "Laptop Gaming",
+        "price": 150000
+      },
+      "quantity": 3,
+      "total_price": 450000
+    },
+    {
+      "id": 2,
+      "product": {
+        "id": 2,
+        "name": "Gaming Mouse",
+        "price": 50000
+      },
+      "quantity": 1,
+      "total_price": 50000
+    }
+  ]
+}
+```
+
+### 7. Checkout
+Mengubah keranjang belanja menjadi transaksi.
+
+**Endpoint:** `POST /api/cart/checkout`
+
+**Headers:**
+```
+Authorization: Bearer {your_access_token}
+Accept: application/json
+```
+
+**Request Body:**
+```json
+{
+  "notes": "Some notes for the transaction"
+}
+```
+
+**Response Success (201):**
+```json
+{
+  "message": "Checkout successful",
   "data": {
-    "updated": 2,
-    "failed": 0,
-    "errors": []
+    "transaction_id": 1,
+    "total_amount": 500000,
+    "status": "pending"
   }
+}
+```
+
+**Response Error (422 - Empty Cart):**
+```json
+{
+  "message": "Shopping cart is empty"
+}
+```
+
+**Response Error (422 - Insufficient Stock):**
+```json
+{
+  "message": "Insufficient stock for some items",
+  "errors": [
+    {
+      "product_id": 1,
+      "product_name": "Laptop Gaming",
+      "requested_quantity": 10,
+      "available_stock": 5
+    }
+  ]
+}
+```
+
+### 8. Validate Stock
+Memvalidasi stok untuk semua item dalam keranjang.
+
+**Endpoint:** `GET /api/cart/validate-stock`
+
+**Headers:**
+```
+Authorization: Bearer {your_access_token}
+Accept: application/json
+```
+
+**Response Success (200):**
+```json
+{
+  "message": "Stock is available for all items in the cart"
+}
+```
+
+**Response Error - Insufficient Stock (422):**
+```json
+{
+  "message": "Insufficient stock for some items",
+  "errors": [
+    {
+      "product_id": 1,
+      "product_name": "Laptop Gaming",
+      "requested_quantity": 10,
+      "available_stock": 5
+    }
+  ]
 }
 ```
 

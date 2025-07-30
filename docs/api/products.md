@@ -18,7 +18,7 @@ Dokumentasi lengkap untuk manajemen produk dan gambar produk dalam sistem.
 | GET | `/api/products` | Mendapatkan semua produk |
 | POST | `/api/products` | Membuat produk baru |
 | GET | `/api/products/{id}` | Mendapatkan detail produk |
-| POST | `/api/products/{id}` | Update produk (gunakan `_method: PUT`) |
+| PUT | `/api/products/{id}` | Update produk (gunakan `_method: PUT`) |
 | DELETE | `/api/products/{id}` | Hapus produk (soft delete) |
 
 ## 🔐 Authentication
@@ -85,12 +85,16 @@ Accept: application/json
 **Query Parameters (optional):**
 - `category_id`: Filter berdasarkan kategori
 - `search`: Search berdasarkan nama produk
-- `sort`: Sort berdasarkan kolom (name, price, created_at)
+- `sort`: Sort berdasarkan kolom (name, price, created_at, updated_at)
 - `order`: Urutan sort (asc, desc)
+- `date_from`: Filter produk dari tanggal (YYYY-MM-DD)
+- `date_to`: Filter produk sampai tanggal (YYYY-MM-DD)
+- `limit`: Jumlah data per halaman (1-100) - default: 15
 
 **Response Success (200):**
 ```json
 {
+    "current_page": 1,
     "data": [
         {
             "id": 1,
@@ -121,7 +125,17 @@ Accept: application/json
                 }
             ]
         }
-    ]
+    ],
+    "first_page_url": "http://localhost:8000/api/products?page=1",
+    "from": 1,
+    "last_page": 1,
+    "last_page_url": "http://localhost:8000/api/products?page=1",
+    "next_page_url": null,
+    "path": "http://localhost:8000/api/products",
+    "per_page": 15,
+    "prev_page_url": null,
+    "to": 1,
+    "total": 1
 }
 ```
 
@@ -181,7 +195,7 @@ Content-Type: multipart/form-data
 }
 ```
 
-**Response Error (422 - Validation):**
+**Response Error (400 - Validation):**
 ```json
 {
     "message": "The given data was invalid.",
@@ -273,6 +287,8 @@ Content-Type: multipart/form-data
 
 **Request Body:**
 - `_method` (required): string - Isi dengan "PUT" untuk form-data
+**Request Body:**
+- `_method` (required): string - Isi dengan "PUT" untuk form-data
 - `name` (optional): string, max:255 - Nama produk
 - `description` (optional): string|null - Deskripsi produk
 - `price` (optional): numeric, min:0 - Harga produk
@@ -322,7 +338,7 @@ Content-Type: multipart/form-data
 }
 ```
 
-**Response Error (422 - Validation):**
+**Response Error (400 - Validation):**
 ```json
 {
     "message": "The given data was invalid.",
@@ -379,7 +395,7 @@ Accept: application/json
 - URL gambar: `http://localhost:8000/storage/product_images/{filename}`
 - Format yang didukung: JPG, JPEG, PNG, GIF
 - Maksimal ukuran file: 2MB per gambar
-- Gambar lama akan dihapus saat update produk dengan gambar baru
+- Gambar lama akan dihapus saat update produk dengan gambar baru. Jika tidak ada gambar baru yang diunggah, gambar lama akan dipertahankan.
 
 ### Pagination
 - Endpoint list products tidak menggunakan pagination untuk simplicity

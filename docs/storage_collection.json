@@ -1,0 +1,189 @@
+{
+    "info": {
+        "_postman_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+        "name": "Hacktiv8 Laravel Final API - Storage",
+        "description": "Storage API collection for Hacktiv8 Laravel Final Project",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "List Files",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/storage?search=example&type=jpg&user_id=1&date_from=2024-01-01&date_to=2024-12-31&sort=created_at&order=desc&limit=10",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "storage"
+                    ],
+                    "query": [
+                        {
+                            "key": "search",
+                            "value": "example",
+                            "description": "Search by filename or original name"
+                        },
+                        {
+                            "key": "type",
+                            "value": "jpg",
+                            "description": "Filter by file type"
+                        },
+                        {
+                            "key": "user_id",
+                            "value": "1",
+                            "description": "Filter by user ID"
+                        },
+                        {
+                            "key": "date_from",
+                            "value": "2024-01-01",
+                            "description": "Filter files from this date"
+                        },
+                        {
+                            "key": "date_to",
+                            "value": "2024-12-31",
+                            "description": "Filter files until this date"
+                        },
+                        {
+                            "key": "sort",
+                            "value": "created_at",
+                            "description": "Sort by field: filename, size, created_at, updated_at"
+                        },
+                        {
+                            "key": "order",
+                            "value": "desc",
+                            "description": "Sort order: asc or desc"
+                        },
+                        {
+                            "key": "limit",
+                            "value": "10",
+                            "description": "Number of results per page"
+                        }
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Upload File",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    }
+                ],
+                "body": {
+                    "mode": "formdata",
+                    "formdata": [
+                        {
+                            "key": "file",
+                            "type": "file",
+                            "src": "/path/to/your/file"
+                        },
+                        {
+                            "key": "folder",
+                            "value": "images",
+                            "type": "text"
+                        }
+                    ]
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/storage",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "storage"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Download File",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/storage/{filename}",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "storage",
+                        "{filename}"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Delete File",
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/storage/{filename}",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "storage",
+                        "{filename}"
+                    ]
+                }
+            },
+            "response": []
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8000",
+            "type": "string"
+        },
+        {
+            "key": "token",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}

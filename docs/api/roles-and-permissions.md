@@ -103,8 +103,9 @@ The system supports four distinct roles with different permission levels:
 ### Users
 - `GET /api/users` - Admin only
 - `GET /api/users/{id}` - Admin only
-- `PUT /api/users/{id}` - Admin (all users), Users (own profile)
+- `PUT/PATCH /api/users/{user}` - Admin (all users), Users (own profile)
 - `DELETE /api/users/{id}` - Admin only
+- `PUT /api/users/{id}/role` - Admin only
 
 ### Audit Trails
 - `GET /api/audit-trails` - Admin, Moderator
@@ -164,6 +165,14 @@ When a user doesn't have sufficient permissions, the API will return:
     "message": "Forbidden. Insufficient permissions.",
     "required_roles": ["admin", "editor"],
     "your_role": "user"
+}
+```
+
+When a user tries to delete their own account, the API will return:
+
+```json
+{
+    "message": "Cannot delete your own account"
 }
 ```
 

@@ -101,22 +101,24 @@ Accept: application/json
 **Response Success (200):**
 ```json
 {
-    "user": {
-        "id": 1,
-        "name": "Test User",
-        "email": "user@example.com",
-        "email_verified_at": null,
-        "created_at": "2023-01-01T00:00:00.000000Z",
-        "updated_at": "2023-01-01T00:00:00.000000Z"
-    },
-    "token": "2|laravel_sanctum_token_here"
+    "success": true,
+    "message": "Login berhasil",
+    "data": {
+        "user": {
+            "id": 1,
+            "name": "Test User",
+            "email": "user@example.com"
+        },
+        "token": "2|laravel_sanctum_token_here",
+        "token_type": "Bearer"
+    }
 }
 ```
 
 **Response Error (401 - Invalid Credentials):**
 ```json
 {
-    "message": "Invalid credentials"
+    "message": "Email atau password salah."
 }
 ```
 
@@ -150,12 +152,31 @@ Accept: application/json
 **Response Success (200):**
 ```json
 {
-    "id": 1,
-    "name": "Test User",
-    "email": "user@example.com",
-    "email_verified_at": null,
-    "created_at": "2023-01-01T00:00:00.000000Z",
-    "updated_at": "2023-01-01T00:00:00.000000Z"
+    "success": true,
+    "message": "Data user berhasil diambil",
+    "data": {
+        "user": {
+            "id": 1,
+            "name": "Test User",
+            "email": "user@example.com",
+            "role": "user",
+            "email_verified_at": null,
+            "created_at": "2023-01-01T00:00:00.000000Z",
+            "updated_at": "2023-01-01T00:00:00.000000Z",
+            "permissions": [
+                "create_transactions",
+                "view_own_transactions"
+            ],
+            "statistics": {
+                "total_products": 0,
+                "total_categories": 0,
+                "total_transactions": 0
+            },
+            "role_description": "Standard user role",
+            "api_token_count": 1,
+            "last_login": "2023-01-01T00:00:00.000000Z"
+        }
+    }
 }
 ```
 
@@ -178,9 +199,12 @@ Authorization: Bearer {your_token}
 Accept: application/json
 ```
 
-**Response Success (204):**
-```
-204 No Content
+**Response Success (200):**
+```json
+{
+    "success": true,
+    "message": "Logout berhasil"
+}
 ```
 **Response Error (401 - Unauthorized):**
 ```json

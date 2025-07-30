@@ -19,6 +19,19 @@ Gunakan tabel di bawah ini untuk navigasi cepat ke dokumentasi yang Anda butuhka
 | 📊 **Audit Trail** | Pelacakan aktivitas CRUD & audit log | [Lihat Dokumentasi](api/audit-trail.md) |
 | 🔐 **Roles & Permissions** | Sistem role-based access control | [Lihat Dokumentasi](api/roles-and-permissions.md) |
 
+## 📦 Postman Collections
+
+| Collection | Description | Download |
+|------------|-------------|----------|
+| 🔐 **Authentication** | Postman collection for Authentication API | [Download](authentication_collection.json) |
+| 💾 **Storage** | Postman collection for Storage API | [Download](storage_collection.json) |
+| 🛍️ **Product** | Postman collection for Product API | [Download](product_collection.json) |
+| 🏷️ **Category** | Postman collection for Category API | [Download](category_collection.json) |
+| 🛒 **Shopping Cart** | Postman collection for Shopping Cart API | [Download](shopping_cart_collection.json) |
+| 💳 **Transaction** | Postman collection for Transaction API | [Download](transactions_collection.json) |
+| 📊 **Audit Trail** | Postman collection for Audit Trail API | [Download](audit_trail_collection.json) |
+| 👥 **Users** | Postman collection for User Management API | [Download](users_collection.json) |
+
 ## 🚀 Fitur Utama
 
 ### Soft Deletes
