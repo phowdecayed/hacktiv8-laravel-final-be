@@ -24,4 +24,12 @@ class Category extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Get the products for the category.
+     */
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
 }

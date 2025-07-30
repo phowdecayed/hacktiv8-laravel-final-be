@@ -30,6 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // User routes - hanya admin yang bisa manage users
     Route::middleware('role:admin')->group(function () {
         Route::resource('users', UserController::class)->only(['index', 'destroy']);
+        Route::put('users/{user}/role', [UserController::class, 'changeRole']);
     });
     Route::resource('users', UserController::class)->only(['show', 'update']);
 
