@@ -14,7 +14,7 @@ class ProductController extends Controller
 {
     /**
      * Display a listing of the resource with query parameters.
-     * 
+     *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -37,7 +37,7 @@ class ProductController extends Controller
         // Sorting
         $sort = $request->get('sort', 'created_at');
         $order = $request->get('order', 'asc');
-        
+
         // Validasi kolom yang bisa di-sort
         $allowedSorts = ['name', 'price', 'created_at', 'updated_at'];
         if (in_array($sort, $allowedSorts)) {
@@ -52,7 +52,7 @@ class ProductController extends Controller
         if ($request->has('date_from')) {
             $query->whereDate('created_at', '>=', $request->date_from);
         }
-        
+
         if ($request->has('date_to')) {
             $query->whereDate('created_at', '<=', $request->date_to);
         }
@@ -142,10 +142,10 @@ class ProductController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
+            'name' => 'string|max:255',
             'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
+            'price' => 'numeric|min:0',
+            'stock' => 'integer|min:0',
             'category_id' => 'nullable|exists:categories,id',
             'images.*' => 'nullable|image|max:2048',
         ]);
@@ -156,14 +156,19 @@ class ProductController extends Controller
 
         $oldValues = $product->toArray();
 
-        $product->update([
-            'name' => $request->name,
-            'description' => $request->description,
-            'price' => $request->price,
-            'stock' => $request->stock,
-            'category_id' => $request->category_id,
-            'user_id' => auth()->id(),
-        ]);
+        $product->fill($request->only([
+            'name',
+            'description',
+            'price',
+            'stock',
+            'category_id',
+        ]));
+
+        if ($request->user()) {
+            $product->user_id = $request->user()->id;
+        }
+
+        $product->save();
 
         // Catat aktivitas update
         AuditTrailService::logUpdate($product, 'Product', $oldValues, $product->toArray(), $request);

@@ -2,8 +2,30 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
-use Illuminate
+class StorageFile extends Model
+{
+    use HasFactory, SoftDeletes;
 
-use Illuminate\nuse Illuminate\Database\Eloquent\Factories\HasFactory;\nuse Illuminate\Database\Eloquent\Model;\n\nclass StorageFile extends Model\n{\n    use HasFactory;\n}\nuse Illuminate\Support\Facades\Storage;\nuse Illuminate\Database\Eloquent\SoftDeletes;\n\nclass StorageFile extends Model\n{\n    use HasFactory, SoftDeletes;\n\n    protected $fillable = [\n        'filename',\n        'original_name',\n        'mime_type',\n        'size',\n        'user_id',\n    ];\n\n    public function user()\n    {\n        return $this->belongsTo(User::class);\n    }\n\n    public function getFileUrlAttribute()\n    {\n        return Storage::url($this->filename);\n    }
+    protected $fillable = [
+        'filename',
+        'original_name',
+        'mime_type',
+        'size',
+        'user_id',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function getFileUrlAttribute()
+    {
+        return Storage::url($this->filename);
+    }
+}

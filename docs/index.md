@@ -18,6 +18,7 @@ Gunakan tabel di bawah ini untuk navigasi cepat ke dokumentasi yang Anda butuhka
 | 💳 **Transaction** | Manajemen transaksi pembelian | [Lihat Dokumentasi](api/transactions.md) |
 | 📊 **Audit Trail** | Pelacakan aktivitas CRUD & audit log | [Lihat Dokumentasi](api/audit-trail.md) |
 | 🔐 **Roles & Permissions** | Sistem role-based access control | [Lihat Dokumentasi](api/roles-and-permissions.md) |
+| 📈 **Dashboard** | Statistik dan metrik dashboard | [Lihat Dokumentasi](api/dashboard.md) |
 
 ## 📦 Postman Collections
 
@@ -31,6 +32,7 @@ Gunakan tabel di bawah ini untuk navigasi cepat ke dokumentasi yang Anda butuhka
 | 💳 **Transaction** | Postman collection for Transaction API | [Download](transactions_collection.json) |
 | 📊 **Audit Trail** | Postman collection for Audit Trail API | [Download](audit_trail_collection.json) |
 | 👥 **Users** | Postman collection for User Management API | [Download](users_collection.json) |
+| 📈 **Dashboard** | Postman collection for Dashboard API | [Download](dashboard_collection.json) |
 
 ## 🚀 Fitur Utama
 

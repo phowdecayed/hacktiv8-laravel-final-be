@@ -82,4 +82,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('audit-trails/model/{modelType}/{modelId}', [AuditTrailController::class, 'getForModel']);
     });
     Route::get('my-audit-trails', [AuditTrailController::class, 'getMyAuditTrails']);
+
+    // Dashboard routes - hanya admin dan moderator
+    Route::middleware('role:admin,moderator')->group(function () {
+        Route::get('dashboard/stats', [App\Http\Controllers\DashboardController::class, 'getStats']);
+        Route::get('dashboard/sales', [App\Http\Controllers\DashboardController::class, 'getSalesOverview']);
+    });
 });
