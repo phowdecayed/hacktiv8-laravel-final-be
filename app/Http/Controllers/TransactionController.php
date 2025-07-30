@@ -35,7 +35,7 @@ class TransactionController extends Controller
         if ($request->has('date_from')) {
             $query->whereDate('created_at', '>=', $request->date_from);
         }
-        
+
         if ($request->has('date_to')) {
             $query->whereDate('created_at', '<=', $request->date_to);
         }
@@ -43,7 +43,7 @@ class TransactionController extends Controller
         // Sorting
         $sort = $request->get('sort', 'created_at');
         $order = $request->get('order', 'asc');
-        
+
         // Validasi kolom yang bisa di-sort
         $allowedSorts = ['created_at', 'total_amount', 'status'];
         if (in_array($sort, $allowedSorts)) {
@@ -189,7 +189,7 @@ class TransactionController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'status' => 'sometimes|in:pending,processing,shipped,completed,cancelled,refunded',
+            'status' => 'sometimes|in:pending,processing,shipped,delivered,completed,cancelled,refunded',
             'notes' => 'sometimes|nullable|string|max:500',
         ]);
 
@@ -315,7 +315,7 @@ class TransactionController extends Controller
         if ($request->has('date_from')) {
             $query->whereDate('created_at', '>=', $request->date_from);
         }
-        
+
         if ($request->has('date_to')) {
             $query->whereDate('created_at', '<=', $request->date_to);
         }
@@ -323,7 +323,7 @@ class TransactionController extends Controller
         // Sorting
         $sort = $request->get('sort', 'created_at');
         $order = $request->get('order', 'asc');
-        
+
         // Validasi kolom yang bisa di-sort
         $allowedSorts = ['created_at', 'total_amount', 'status'];
         if (in_array($sort, $allowedSorts)) {
