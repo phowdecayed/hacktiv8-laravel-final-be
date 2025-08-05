@@ -60,8 +60,17 @@ class DashboardController extends Controller
     {
         $totalSales = Transaction::sum('total_amount');
 
+        $driver = DB::connection()->getDriverName();
+        $monthExpression = "strftime('%Y-%m', created_at)"; // Fallback for unknown drivers
+
+        if ($driver === 'mysql') {
+            $monthExpression = "DATE_FORMAT(created_at, '%Y-%m')";
+        } elseif ($driver === 'pgsql') {
+            $monthExpression = "to_char(created_at, 'YYYY-MM')";
+        }
+
         $salesByMonth = Transaction::select(
-            DB::raw('substr(created_at, 1, 7) as month'),
+            DB::raw("$monthExpression as month"),
             DB::raw('SUM(total_amount) as total_sales')
         )
             ->groupBy('month')
