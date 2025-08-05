@@ -8,8 +8,6 @@ return new class extends Migration
 {
     /**
      * Jalankan migrasi untuk menambahkan soft deletes ke tabel transactions.
-     *
-     * @return void
      */
     public function up(): void
     {
@@ -20,8 +18,6 @@ return new class extends Migration
 
     /**
      * Rollback migrasi untuk menghapus kolom deleted_at.
-     *
-     * @return void
      */
     public function down(): void
     {

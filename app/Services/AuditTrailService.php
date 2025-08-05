@@ -15,10 +15,7 @@ class AuditTrailService
     /**
      * Catat aktivitas create pada model
      *
-     * @param mixed $model
-     * @param string $modelType
-     * @param Request|null $request
-     * @return AuditTrail
+     * @param  mixed  $model
      */
     public static function logCreate($model, string $modelType, ?Request $request = null): AuditTrail
     {
@@ -28,12 +25,7 @@ class AuditTrailService
     /**
      * Catat aktivitas update pada model
      *
-     * @param mixed $model
-     * @param string $modelType
-     * @param array $oldValues
-     * @param array $newValues
-     * @param Request|null $request
-     * @return AuditTrail
+     * @param  mixed  $model
      */
     public static function logUpdate($model, string $modelType, array $oldValues, array $newValues, ?Request $request = null): AuditTrail
     {
@@ -43,11 +35,7 @@ class AuditTrailService
     /**
      * Catat aktivitas delete pada model
      *
-     * @param mixed $model
-     * @param string $modelType
-     * @param array $oldValues
-     * @param Request|null $request
-     * @return AuditTrail
+     * @param  mixed  $model
      */
     public static function logDelete($model, string $modelType, array $oldValues, ?Request $request = null): AuditTrail
     {
@@ -57,10 +45,7 @@ class AuditTrailService
     /**
      * Catat aktivitas restore pada model
      *
-     * @param mixed $model
-     * @param string $modelType
-     * @param Request|null $request
-     * @return AuditTrail
+     * @param  mixed  $model
      */
     public static function logRestore($model, string $modelType, ?Request $request = null): AuditTrail
     {
@@ -70,13 +55,7 @@ class AuditTrailService
     /**
      * Buat record audit trail
      *
-     * @param mixed $model
-     * @param string $modelType
-     * @param string $action
-     * @param array|null $oldValues
-     * @param array|null $newValues
-     * @param Request|null $request
-     * @return AuditTrail
+     * @param  mixed  $model
      */
     private static function createAuditTrail($model, string $modelType, string $action, ?array $oldValues, ?array $newValues, ?Request $request = null): AuditTrail
     {
@@ -99,8 +78,6 @@ class AuditTrailService
     /**
      * Ambil audit trail untuk model tertentu
      *
-     * @param string $modelType
-     * @param int $modelId
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public static function getForModel(string $modelType, int $modelId)
@@ -115,7 +92,6 @@ class AuditTrailService
     /**
      * Ambil audit trail untuk user tertentu
      *
-     * @param int $userId
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public static function getForUser(int $userId)
@@ -129,7 +105,6 @@ class AuditTrailService
     /**
      * Ambil audit trail dengan filter
      *
-     * @param array $filters
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public static function getFiltered(array $filters = [])

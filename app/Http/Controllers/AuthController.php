@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -16,8 +15,8 @@ class AuthController extends Controller
 {
     /**
      * Handle user registration
-     * 
-     * @param Request $request Data registrasi dari user
+     *
+     * @param  Request  $request  Data registrasi dari user
      * @return \Illuminate\Http\JsonResponse Response JSON dengan token atau error
      */
     public function register(Request $request)
@@ -44,8 +43,8 @@ class AuthController extends Controller
 
     /**
      * Handle user login
-     * 
-     * @param Request $request Data login dari user
+     *
+     * @param  Request  $request  Data login dari user
      * @return \Illuminate\Http\JsonResponse Response JSON dengan token atau error
      */
     public function login(Request $request)
@@ -60,7 +59,7 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         // Cek apakah user ada dan password valid
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['Email atau password salah.'],
             ]);
@@ -80,21 +79,21 @@ class AuthController extends Controller
                     'email' => $user->email,
                 ],
                 'token' => $token,
-                'token_type' => 'Bearer'
-            ]
+                'token_type' => 'Bearer',
+            ],
         ]);
     }
 
     /**
      * Get authenticated user information
-     * 
-     * @param Request $request Request dengan token autentikasi
+     *
+     * @param  Request  $request  Request dengan token autentikasi
      * @return \Illuminate\Http\JsonResponse Response JSON dengan data user lengkap
      */
     public function user(Request $request)
     {
         $user = $request->user();
-        
+
         // Load relasi yang dibutuhkan
         $user->loadCount(['products', 'categories', 'transactions']);
 
@@ -125,8 +124,8 @@ class AuthController extends Controller
             'success' => true,
             'message' => 'Data user berhasil diambil',
             'data' => [
-                'user' => $userData
-            ]
+                'user' => $userData,
+            ],
         ]);
     }
 
@@ -137,24 +136,25 @@ class AuthController extends Controller
     {
         $permissions = [
             'admin' => [
-                'manage_products', 'manage_categories', 'manage_transactions', 
-                'manage_users', 'view_audit_trails', 'manage_storage'
+                'manage_products', 'manage_categories', 'manage_transactions',
+                'manage_users', 'view_audit_trails', 'manage_storage',
             ],
             'editor' => [
                 'manage_products', 'manage_categories', 'create_transactions',
-                'manage_storage'
+                'manage_storage',
             ],
             'moderator' => [
                 'view_transactions', 'update_transactions', 'view_audit_trails',
-                'create_transactions'
+                'create_transactions',
             ],
             'user' => [
-                'create_transactions', 'view_own_transactions'
-            ]
+                'create_transactions', 'view_own_transactions',
+            ],
         ];
 
         // Gunakan 'user' sebagai default jika role null atau tidak dikenal
         $effectiveRole = $role ?? 'user';
+
         return $permissions[$effectiveRole] ?? $permissions['user'];
     }
 
@@ -167,18 +167,19 @@ class AuthController extends Controller
             'admin' => 'Full access to all system features and user management',
             'editor' => 'Can manage products, categories, and storage',
             'moderator' => 'Can manage transactions and view audit trails',
-            'user' => 'Can create transactions and view own data'
+            'user' => 'Can create transactions and view own data',
         ];
 
         // Gunakan 'user' sebagai default jika role null atau tidak dikenal
         $effectiveRole = $role ?? 'user';
+
         return $descriptions[$effectiveRole] ?? 'Standard user role';
     }
 
     /**
      * Handle user logout
-     * 
-     * @param Request $request Request dengan token autentikasi
+     *
+     * @param  Request  $request  Request dengan token autentikasi
      * @return \Illuminate\Http\JsonResponse Response JSON konfirmasi logout
      */
     public function logout(Request $request)
@@ -188,7 +189,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Logout berhasil'
+            'message' => 'Logout berhasil',
         ]);
     }
 }

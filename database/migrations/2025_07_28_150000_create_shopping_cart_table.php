@@ -8,7 +8,7 @@ return new class extends Migration
 {
     /**
      * Run the migrations untuk membuat tabel shopping cart
-     * 
+     *
      * Struktur tabel:
      * - id: Primary key auto increment
      * - user_id: Foreign key ke users table
@@ -25,7 +25,7 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
             $table->integer('quantity')->unsigned()->default(1);
             $table->timestamps();
-            
+
             // Index untuk performa query
             $table->index(['user_id', 'product_id']);
             $table->unique(['user_id', 'product_id']);

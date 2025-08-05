@@ -8,8 +8,6 @@ return new class extends Migration
 {
     /**
      * Jalankan migrasi untuk membuat tabel transactions.
-     *
-     * @return void
      */
     public function up(): void
     {
@@ -29,8 +27,6 @@ return new class extends Migration
 
     /**
      * Rollback migrasi untuk menghapus tabel transactions.
-     *
-     * @return void
      */
     public function down(): void
     {

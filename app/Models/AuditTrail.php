@@ -35,7 +35,7 @@ class AuditTrail extends Model
         'new_values',
         'ip_address',
         'user_agent',
-        'created_at'
+        'created_at',
     ];
 
     /**
@@ -47,7 +47,7 @@ class AuditTrail extends Model
         'old_values' => 'array',
         'new_values' => 'array',
         'created_at' => 'datetime',
-        'deleted_at' => 'datetime'
+        'deleted_at' => 'datetime',
     ];
 
     /**
@@ -63,8 +63,7 @@ class AuditTrail extends Model
     /**
      * Scope untuk filter berdasarkan model type
      *
-     * @param \Illuminate\Database\Eloquent\Builder<AuditTrail> $query
-     * @param string $modelType
+     * @param  \Illuminate\Database\Eloquent\Builder<AuditTrail>  $query
      * @return \Illuminate\Database\Eloquent\Builder<AuditTrail>
      */
     public function scopeForModel($query, string $modelType)
@@ -75,8 +74,7 @@ class AuditTrail extends Model
     /**
      * Scope untuk filter berdasarkan action
      *
-     * @param \Illuminate\Database\Eloquent\Builder<AuditTrail> $query
-     * @param string $action
+     * @param  \Illuminate\Database\Eloquent\Builder<AuditTrail>  $query
      * @return \Illuminate\Database\Eloquent\Builder<AuditTrail>
      */
     public function scopeForAction($query, string $action)
@@ -87,8 +85,7 @@ class AuditTrail extends Model
     /**
      * Scope untuk filter berdasarkan user
      *
-     * @param \Illuminate\Database\Eloquent\Builder<AuditTrail> $query
-     * @param int $userId
+     * @param  \Illuminate\Database\Eloquent\Builder<AuditTrail>  $query
      * @return \Illuminate\Database\Eloquent\Builder<AuditTrail>
      */
     public function scopeForUser($query, int $userId)
@@ -99,9 +96,7 @@ class AuditTrail extends Model
     /**
      * Scope untuk filter berdasarkan tanggal
      *
-     * @param \Illuminate\Database\Eloquent\Builder<AuditTrail> $query
-     * @param string $dateFrom
-     * @param string $dateTo
+     * @param  \Illuminate\Database\Eloquent\Builder<AuditTrail>  $query
      * @return \Illuminate\Database\Eloquent\Builder<AuditTrail>
      */
     public function scopeBetweenDates($query, string $dateFrom, string $dateTo)

@@ -2,12 +2,10 @@
 
 namespace App\Providers;
 
-use App\Models\AuditTrail;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\User;
-use App\Policies\AuditTrailPolicy;
 use App\Policies\CategoryPolicy;
 use App\Policies\ProductPolicy;
 use App\Policies\TransactionPolicy;

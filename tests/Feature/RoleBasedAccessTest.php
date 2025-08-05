@@ -2,10 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Product;
 use App\Models\Category;
 use App\Models\Transaction;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -14,8 +13,11 @@ class RoleBasedAccessTest extends TestCase
     use RefreshDatabase;
 
     protected $admin;
+
     protected $editor;
+
     protected $moderator;
+
     protected $user;
 
     protected function setUp(): void
@@ -34,7 +36,7 @@ class RoleBasedAccessTest extends TestCase
     {
         $response = $this->actingAs($this->admin)
             ->getJson('/api/products');
-        
+
         $response->assertStatus(200);
     }
 
@@ -42,7 +44,7 @@ class RoleBasedAccessTest extends TestCase
     public function editor_can_create_products()
     {
         $category = Category::factory()->create();
-        
+
         $response = $this->actingAs($this->editor)
             ->postJson('/api/products', [
                 'name' => 'Test Product',
@@ -50,7 +52,7 @@ class RoleBasedAccessTest extends TestCase
                 'price' => 100000,
                 'stock' => 10,
                 'category_id' => $category->id,
-                'images' => [\Illuminate\Http\UploadedFile::fake()->image('test.jpg')]
+                'images' => [\Illuminate\Http\UploadedFile::fake()->image('test.jpg')],
             ]);
 
         $response->assertStatus(201);
@@ -60,14 +62,14 @@ class RoleBasedAccessTest extends TestCase
     public function user_cannot_create_products()
     {
         $category = Category::factory()->create();
-        
+
         $response = $this->actingAs($this->user)
             ->postJson('/api/products', [
                 'name' => 'Test Product',
                 'description' => 'Test Description',
                 'price' => 100000,
                 'category_id' => $category->id,
-                'image' => 'test.jpg'
+                'image' => 'test.jpg',
             ]);
 
         $response->assertStatus(403);
@@ -77,7 +79,7 @@ class RoleBasedAccessTest extends TestCase
     public function moderator_can_view_all_transactions()
     {
         Transaction::factory()->count(3)->create();
-        
+
         $response = $this->actingAs($this->moderator)
             ->getJson('/api/transactions');
 
@@ -88,7 +90,7 @@ class RoleBasedAccessTest extends TestCase
     public function user_cannot_view_all_transactions()
     {
         Transaction::factory()->count(3)->create();
-        
+
         $response = $this->actingAs($this->user)
             ->getJson('/api/transactions');
 
@@ -99,7 +101,7 @@ class RoleBasedAccessTest extends TestCase
     public function user_can_view_own_transactions()
     {
         $transaction = Transaction::factory()->create(['user_id' => $this->user->id]);
-        
+
         $response = $this->actingAs($this->user)
             ->getJson('/api/my-transactions');
 
@@ -129,7 +131,7 @@ class RoleBasedAccessTest extends TestCase
     {
         $response = $this->actingAs($this->user)
             ->putJson("/api/users/{$this->user->id}", [
-                'name' => 'Updated Name'
+                'name' => 'Updated Name',
             ]);
 
         $response->assertStatus(200);
@@ -139,10 +141,10 @@ class RoleBasedAccessTest extends TestCase
     public function user_cannot_update_other_user_profile()
     {
         $otherUser = User::factory()->create(['role' => 'user']);
-        
+
         $response = $this->actingAs($this->user)
             ->putJson("/api/users/{$otherUser->id}", [
-                'name' => 'Updated Name'
+                'name' => 'Updated Name',
             ]);
 
         $response->assertStatus(403);
@@ -152,10 +154,10 @@ class RoleBasedAccessTest extends TestCase
     public function admin_can_update_any_user()
     {
         $otherUser = User::factory()->create(['role' => 'user']);
-        
+
         $response = $this->actingAs($this->admin)
             ->putJson("/api/users/{$otherUser->id}", [
-                'name' => 'Updated Name'
+                'name' => 'Updated Name',
             ]);
 
         $response->assertStatus(200);
@@ -166,12 +168,12 @@ class RoleBasedAccessTest extends TestCase
     {
         $response = $this->actingAs($this->admin)
             ->getJson('/api/audit-trails');
-        
+
         $response->assertStatus(200);
 
         $response = $this->actingAs($this->moderator)
             ->getJson('/api/audit-trails');
-        
+
         $response->assertStatus(200);
     }
 

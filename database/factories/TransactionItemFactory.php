@@ -2,13 +2,13 @@
 
 namespace Database\Factories;
 
-use App\Models\Transaction;
 use App\Models\Product;
+use App\Models\Transaction;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * Factory untuk model TransactionItem
- * 
+ *
  * Digunakan untuk membuat data dummy transaction items
  * untuk testing dan database seeding
  */

@@ -1,15 +1,15 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\StorageController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\AuditTrailController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\HealthCheckController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShoppingCartController;
+use App\Http\Controllers\StorageController;
+use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Route;
 
 // Public routes - tidak memerlukan autentikasi
 Route::post('/register', [AuthController::class, 'register']);
@@ -21,6 +21,7 @@ Route::get('products/{product}', [ProductController::class, 'show']);
 Route::get('categories', [CategoryController::class, 'index']);
 Route::get('categories/{category}', [CategoryController::class, 'show']);
 Route::get('/storage/{filename}', [StorageController::class, 'show']);
+Route::get('/health', [HealthCheckController::class, 'check']);
 
 // Protected routes - memerlukan autentikasi
 Route::middleware('auth:sanctum')->group(function () {

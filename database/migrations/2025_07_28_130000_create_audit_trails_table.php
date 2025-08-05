@@ -30,9 +30,9 @@ return new class extends Migration
 
             // Foreign key constraint
             $table->foreign('user_id')
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('set null');
+                ->references('id')
+                ->on('users')
+                ->onDelete('set null');
 
             // Index untuk performa query
             $table->index(['model_type', 'model_id']);

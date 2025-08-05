@@ -8,14 +8,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Model Transaction untuk mengelola transaksi pembelian
- * 
+ *
  * Struktur tabel:
  * - id: Primary key
  * - user_id: Foreign key ke users table
  * - total_amount: Total nilai transaksi
  * - status: Status transaksi (all, pending, processing, shipped, completed, cancelled, refunded)
  * - notes: Catatan tambahan untuk transaksi
- * 
+ *
  * Relasi:
  * - belongsTo User: Setiap transaksi dimiliki oleh satu user
  * - hasMany TransactionItem: Satu transaksi memiliki banyak items
@@ -26,6 +26,7 @@ class Transaction extends Model
 
     /**
      * Kolom yang dapat diisi secara massal
+     *
      * @var array<string>
      */
     protected $fillable = [
@@ -37,6 +38,7 @@ class Transaction extends Model
 
     /**
      * Kolom yang harus di-cast ke tipe data tertentu
+     *
      * @var array<string, string>
      */
     protected $casts = [
@@ -44,13 +46,13 @@ class Transaction extends Model
         'status' => 'string',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        'deleted_at' => 'datetime'
+        'deleted_at' => 'datetime',
     ];
 
     /**
      * Relasi ke model User
      * Setiap transaksi dimiliki oleh satu user
-     * 
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<User, Transaction>
      */
     public function user()
@@ -61,7 +63,7 @@ class Transaction extends Model
     /**
      * Relasi ke model TransactionItem
      * Satu transaksi memiliki banyak items
-     * 
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<TransactionItem>
      */
     public function items()
@@ -71,9 +73,8 @@ class Transaction extends Model
 
     /**
      * Scope untuk filter berdasarkan user
-     * 
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int $userId
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeForUser($query, int $userId)
@@ -83,8 +84,8 @@ class Transaction extends Model
 
     /**
      * Scope untuk eager loading items dengan product
-     * 
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWithItems($query)
@@ -94,9 +95,6 @@ class Transaction extends Model
 
     /**
      * Set the transaction's status.
-     *
-     * @param  string  $value
-     * @return void
      */
     public function setStatusAttribute(string $value): void
     {

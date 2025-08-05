@@ -5,14 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\ShoppingCart;
 use App\Models\Transaction;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 /**
  * Controller untuk mengelola shopping cart operations
- * 
+ *
  * Endpoint yang tersedia:
  * - index: Mendapatkan semua item dalam keranjang
  * - store: Menambahkan item ke keranjang
@@ -26,9 +26,6 @@ class ShoppingCartController extends Controller
 {
     /**
      * Mendapatkan semua item dalam keranjang user yang sedang login
-     * 
-     * @param Request $request
-     * @return JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
@@ -46,53 +43,50 @@ class ShoppingCartController extends Controller
                         'name' => $item->product->name,
                         'price' => $item->product->price,
                         'stock' => $item->product->stock,
-                        'image' => $item->product->images->first()?->image_path ?? null
+                        'image' => $item->product->images->first()?->image_path ?? null,
                     ],
                     'quantity' => $item->quantity,
                     'total_price' => $item->total_price,
                     'created_at' => $item->created_at,
-                    'updated_at' => $item->updated_at
+                    'updated_at' => $item->updated_at,
                 ];
             }),
             'pagination' => [
                 'current_page' => $cartItems->currentPage(),
                 'per_page' => $cartItems->perPage(),
                 'total' => $cartItems->total(),
-                'last_page' => $cartItems->lastPage()
-            ]
+                'last_page' => $cartItems->lastPage(),
+            ],
         ]);
     }
 
     /**
      * Menambahkan item ke keranjang
-     * 
-     * @param Request $request
-     * @return JsonResponse
      */
     public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1'
+            'quantity' => 'required|integer|min:1',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation error',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
         $product = Product::findOrFail($request->product_id);
-        
+
         // Validasi stok tersedia
         if ($product->stock < $request->quantity) {
             return response()->json([
                 'message' => 'Insufficient stock',
                 'errors' => [
-                    'quantity' => ['The requested quantity exceeds available stock.']
+                    'quantity' => ['The requested quantity exceeds available stock.'],
                 ],
-                'available_stock' => $product->stock
+                'available_stock' => $product->stock,
             ], 422);
         }
 
@@ -114,9 +108,9 @@ class ShoppingCartController extends Controller
                 return response()->json([
                     'message' => 'Insufficient stock for total quantity in cart.',
                     'errors' => [
-                        'quantity' => ['The total quantity in your cart exceeds available stock.']
+                        'quantity' => ['The total quantity in your cart exceeds available stock.'],
                     ],
-                    'available_stock' => $product->stock
+                    'available_stock' => $product->stock,
                 ], 422);
             }
 
@@ -134,11 +128,11 @@ class ShoppingCartController extends Controller
                         'id' => $product->id,
                         'name' => $product->name,
                         'price' => $product->price,
-                        'stock' => $product->stock
+                        'stock' => $product->stock,
                     ],
                     'quantity' => $cartItem->quantity,
-                    'total_price' => $cartItem->quantity * $product->price
-                ]
+                    'total_price' => $cartItem->quantity * $product->price,
+                ],
             ], 200);
         }
 
@@ -148,16 +142,16 @@ class ShoppingCartController extends Controller
             return response()->json([
                 'message' => 'Insufficient stock',
                 'errors' => [
-                    'quantity' => ['The requested quantity exceeds available stock.']
+                    'quantity' => ['The requested quantity exceeds available stock.'],
                 ],
-                'available_stock' => $product->stock
+                'available_stock' => $product->stock,
             ], 422);
         }
 
         $cartItem = ShoppingCart::create([
             'user_id' => auth()->id(),
             'product_id' => $request->product_id,
-            'quantity' => $request->quantity
+            'quantity' => $request->quantity,
         ]);
 
         return response()->json([
@@ -168,43 +162,39 @@ class ShoppingCartController extends Controller
                     'id' => $product->id,
                     'name' => $product->name,
                     'price' => $product->price,
-                    'stock' => $product->stock
+                    'stock' => $product->stock,
                 ],
                 'quantity' => $cartItem->quantity,
-                'total_price' => $cartItem->quantity * $product->price
-            ]
+                'total_price' => $cartItem->quantity * $product->price,
+            ],
         ], 201);
     }
 
     /**
      * Mengubah jumlah item dalam keranjang
-     * 
-     * @param Request $request
-     * @param int $id
-     * @return JsonResponse
      */
     public function update(Request $request, int $id): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'quantity' => 'required|integer|min:1'
+            'quantity' => 'required|integer|min:1',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation error',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
         $cartItem = ShoppingCart::forUser(auth()->id())->findOrFail($id);
-        
+
         $product = $cartItem->product;
 
         // Validasi stok tersedia
         if ($product->stock < $request->quantity) {
             return response()->json([
                 'message' => 'Insufficient stock',
-                'available_stock' => $product->stock
+                'available_stock' => $product->stock,
             ], 422);
         }
 
@@ -219,19 +209,16 @@ class ShoppingCartController extends Controller
                     'id' => $product->id,
                     'name' => $product->name,
                     'price' => $product->price,
-                    'stock' => $product->stock
+                    'stock' => $product->stock,
                 ],
                 'quantity' => $cartItem->quantity,
-                'total_price' => $cartItem->total_price
-            ]
+                'total_price' => $cartItem->total_price,
+            ],
         ]);
     }
 
     /**
      * Menghapus item dari keranjang
-     * 
-     * @param int $id
-     * @return JsonResponse
      */
     public function destroy(int $id): JsonResponse
     {
@@ -239,42 +226,37 @@ class ShoppingCartController extends Controller
         $cartItem->delete();
 
         return response()->json([
-            'message' => 'Item removed from cart successfully'
+            'message' => 'Item removed from cart successfully',
         ]);
     }
 
     /**
      * Mengosongkan seluruh keranjang
-     * 
-     * @return JsonResponse
      */
     public function clear(): JsonResponse
     {
         ShoppingCart::forUser(auth()->id())->delete();
 
         return response()->json([
-            'message' => 'Shopping cart cleared successfully'
+            'message' => 'Shopping cart cleared successfully',
         ]);
     }
 
     /**
      * Update multiple items sekaligus
-     * 
-     * @param Request $request
-     * @return JsonResponse
      */
     public function batchUpdate(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'items' => 'required|array',
             'items.*.id' => 'required|exists:shopping_cart,id',
-            'items.*.quantity' => 'required|integer|min:1'
+            'items.*.quantity' => 'required|integer|min:1',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation error',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -304,20 +286,17 @@ class ShoppingCartController extends Controller
                     'product' => [
                         'id' => $item->product->id,
                         'name' => $item->product->name,
-                        'price' => $item->product->price
+                        'price' => $item->product->price,
                     ],
                     'quantity' => $item->quantity,
-                    'total_price' => $item->total_price
+                    'total_price' => $item->total_price,
                 ];
-            })
+            }),
         ]);
     }
 
     /**
      * Konversi keranjang menjadi transaksi
-     * 
-     * @param Request $request
-     * @return JsonResponse
      */
     public function checkout(Request $request): JsonResponse
     {
@@ -327,18 +306,18 @@ class ShoppingCartController extends Controller
 
         if ($cartItems->isEmpty()) {
             return response()->json([
-                'message' => 'Shopping cart is empty'
+                'message' => 'Shopping cart is empty',
             ], 422);
         }
 
         $validator = Validator::make($request->all(), [
-            'notes' => 'nullable|string|max:1000'
+            'notes' => 'nullable|string|max:1000',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation error',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -356,7 +335,7 @@ class ShoppingCartController extends Controller
                     'product_id' => $cartItem->product_id,
                     'quantity' => $cartItem->quantity,
                     'price' => $cartItem->product->price,
-                    'total' => $cartItem->total_price
+                    'total' => $cartItem->total_price,
                 ];
             }
 
@@ -365,7 +344,7 @@ class ShoppingCartController extends Controller
                 'user_id' => auth()->id(),
                 'total_amount' => $totalAmount,
                 'notes' => $request->notes,
-                'status' => 'pending'
+                'status' => 'pending',
             ]);
 
             // Attach items ke transaksi
@@ -385,16 +364,13 @@ class ShoppingCartController extends Controller
             'data' => [
                 'transaction_id' => $transaction->id,
                 'total_amount' => $transaction->total_amount,
-                'status' => $transaction->status
-            ]
+                'status' => $transaction->status,
+            ],
         ], 201);
     }
 
     /**
      * Memvalidasi stok untuk semua item di keranjang
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function validateStock(Request $request): JsonResponse
     {
@@ -409,7 +385,7 @@ class ShoppingCartController extends Controller
                 'available_stock' => $item->product->stock,
                 'cart_quantity' => $item->quantity,
             ];
-            
+
             $detailedCartItems[] = $itemDetails;
 
             if ($item->product->stock < $item->quantity) {
@@ -420,13 +396,13 @@ class ShoppingCartController extends Controller
         if (count($insufficientStockItems) > 0) {
             return response()->json([
                 'message' => 'One or more items in your cart have insufficient stock.',
-                'data' => $insufficientStockItems
+                'data' => $insufficientStockItems,
             ], 422);
         }
 
         return response()->json([
             'message' => 'All items in cart have sufficient stock.',
-            'data' => $detailedCartItems
+            'data' => $detailedCartItems,
         ]);
     }
 }

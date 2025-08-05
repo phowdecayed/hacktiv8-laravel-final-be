@@ -4,15 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Model ShoppingCart untuk mengelola keranjang belanja
- * 
+ *
  * Relasi:
  * - belongsTo User: Setiap item cart dimiliki oleh satu user
  * - belongsTo Product: Setiap item cart merujuk ke satu product
- * 
+ *
  * Fitur:
  * - Soft deletes untuk data recovery
  * - Mass assignment protection
@@ -24,34 +23,37 @@ class ShoppingCart extends Model
 
     /**
      * Nama tabel di database
+     *
      * @var string
      */
     protected $table = 'shopping_cart';
 
     /**
      * Kolom yang dapat diisi secara massal
+     *
      * @var array<string>
      */
     protected $fillable = [
         'user_id',
         'product_id',
-        'quantity'
+        'quantity',
     ];
 
     /**
      * Kolom yang harus di-cast ke tipe data tertentu
+     *
      * @var array<string, string>
      */
     protected $casts = [
         'quantity' => 'integer',
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
     ];
 
     /**
      * Relasi ke model User
      * Setiap cart item dimiliki oleh satu user
-     * 
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<User, ShoppingCart>
      */
     public function user()
@@ -62,7 +64,7 @@ class ShoppingCart extends Model
     /**
      * Relasi ke model Product
      * Setiap cart item merujuk ke satu product
-     * 
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Product, ShoppingCart>
      */
     public function product()
@@ -73,8 +75,6 @@ class ShoppingCart extends Model
     /**
      * Accessor untuk menghitung total harga per item
      * Mengalikan quantity dengan harga produk
-     * 
-     * @return float
      */
     public function getTotalPriceAttribute(): float
     {
@@ -83,9 +83,8 @@ class ShoppingCart extends Model
 
     /**
      * Scope untuk filter berdasarkan user
-     * 
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int $userId
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeForUser($query, int $userId)
@@ -95,8 +94,8 @@ class ShoppingCart extends Model
 
     /**
      * Scope untuk eager loading product relationship
-     * 
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWithProduct($query)

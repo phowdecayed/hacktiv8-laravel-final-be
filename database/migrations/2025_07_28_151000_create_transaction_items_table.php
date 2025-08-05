@@ -8,7 +8,7 @@ return new class extends Migration
 {
     /**
      * Run the migrations untuk membuat tabel transaction_items
-     * 
+     *
      * Struktur tabel:
      * - id: Primary key auto increment
      * - transaction_id: Foreign key ke transactions table
@@ -27,7 +27,7 @@ return new class extends Migration
             $table->decimal('price', 10, 2);
             $table->decimal('total', 10, 2);
             $table->timestamps();
-            
+
             // Index untuk performa query
             $table->index(['transaction_id', 'product_id']);
         });

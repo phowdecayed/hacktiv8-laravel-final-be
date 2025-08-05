@@ -3,7 +3,6 @@
 namespace App\Policies;
 
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class UserPolicy
 {
@@ -20,7 +19,7 @@ class UserPolicy
      */
     public function view(User $user, User $model): bool
     {
-        return $user->role === 'admin' || 
+        return $user->role === 'admin' ||
                $user->role === 'moderator' ||
                $user->id === $model->id;
     }
@@ -38,7 +37,7 @@ class UserPolicy
      */
     public function update(User $user, User $model): bool
     {
-        return $user->role === 'admin' || 
+        return $user->role === 'admin' ||
                ($user->role === 'moderator' && $model->role !== 'admin') ||
                $user->id === $model->id;
     }

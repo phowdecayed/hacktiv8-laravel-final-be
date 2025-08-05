@@ -11,8 +11,7 @@ class CategoryController extends Controller
 {
     /**
      * Display a listing of the resource with query parameters.
-     * 
-     * @param  \Illuminate\Http\Request  $request
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
@@ -34,7 +33,7 @@ class CategoryController extends Controller
         // Sorting
         $sort = $request->get('sort', 'created_at');
         $order = $request->get('order', 'asc');
-        
+
         // Validasi kolom yang bisa di-sort
         $allowedSorts = ['name', 'created_at', 'updated_at'];
         if (in_array($sort, $allowedSorts)) {
@@ -49,7 +48,7 @@ class CategoryController extends Controller
         if ($request->has('date_from')) {
             $query->whereDate('created_at', '>=', $request->date_from);
         }
-        
+
         if ($request->has('date_to')) {
             $query->whereDate('created_at', '<=', $request->date_to);
         }
@@ -84,7 +83,7 @@ class CategoryController extends Controller
 
         return response()->json([
             'message' => 'Category created successfully',
-            'data' => $category
+            'data' => $category,
         ], 201);
     }
 
@@ -94,12 +93,13 @@ class CategoryController extends Controller
     public function show(string $id)
     {
         $category = Category::with('user')->find($id);
-        if (!$category) {
+        if (! $category) {
             return response()->json(['message' => 'Category not found'], 404);
         }
+
         return response()->json([
             'message' => 'Category updated successfully',
-            'data' => $category
+            'data' => $category,
         ]);
     }
 
@@ -109,12 +109,12 @@ class CategoryController extends Controller
     public function update(Request $request, string $id)
     {
         $category = Category::find($id);
-        if (!$category) {
+        if (! $category) {
             return response()->json(['message' => 'Category not found'], 404);
         }
 
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255|unique:categories,name,' . $id,
+            'name' => 'required|string|max:255|unique:categories,name,'.$id,
             'description' => 'nullable|string',
         ]);
 
@@ -135,7 +135,7 @@ class CategoryController extends Controller
 
         return response()->json([
             'message' => 'Category updated successfully',
-            'data' => $category
+            'data' => $category,
         ]);
     }
 
@@ -145,7 +145,7 @@ class CategoryController extends Controller
     public function destroy(string $id)
     {
         $category = Category::find($id);
-        if (!$category) {
+        if (! $category) {
             return response()->json(['message' => 'Category not found'], 404);
         }
 

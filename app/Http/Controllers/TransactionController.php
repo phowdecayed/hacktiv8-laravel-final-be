@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Transaction;
 use App\Models\Product;
+use App\Models\Transaction;
 use App\Services\AuditTrailService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+
 class TransactionController extends Controller
 {
     /**
      * Display a listing of all transactions with query parameters.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
@@ -58,14 +58,13 @@ class TransactionController extends Controller
 
         return response()->json([
             'message' => 'Transactions retrieved successfully',
-            'data' => $transactions
+            'data' => $transactions,
         ], 200);
     }
 
     /**
      * Store a newly created transaction in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
@@ -80,7 +79,7 @@ class TransactionController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation error',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -92,10 +91,10 @@ class TransactionController extends Controller
             // Validasi semua produk dan stock
             foreach ($items as $item) {
                 $product = Product::find($item['product_id']);
-                if (!$product) {
+                if (! $product) {
                     return response()->json([
                         'message' => 'Product not found',
-                        'product_id' => $item['product_id']
+                        'product_id' => $item['product_id'],
                     ], 404);
                 }
 
@@ -104,7 +103,7 @@ class TransactionController extends Controller
                         'message' => 'Insufficient stock',
                         'product_id' => $item['product_id'],
                         'available_stock' => $product->stock,
-                        'requested_quantity' => $item['quantity']
+                        'requested_quantity' => $item['quantity'],
                     ], 422);
                 }
             }
@@ -144,7 +143,7 @@ class TransactionController extends Controller
 
             return response()->json([
                 'message' => 'Transaction created successfully',
-                'data' => $transaction->load(['user', 'items.product'])
+                'data' => $transaction->load(['user', 'items.product']),
             ], 201);
         });
     }
@@ -152,39 +151,36 @@ class TransactionController extends Controller
     /**
      * Display the specified transaction.
      *
-     * @param  string  $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(string $id)
     {
         $transaction = Transaction::with(['user', 'items.product'])->find($id);
 
-        if (!$transaction) {
+        if (! $transaction) {
             return response()->json([
-                'message' => 'Transaction not found'
+                'message' => 'Transaction not found',
             ], 404);
         }
 
         return response()->json([
             'message' => 'Transaction retrieved successfully',
-            'data' => $transaction
+            'data' => $transaction,
         ], 200);
     }
 
     /**
      * Update the specified transaction in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  string  $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, string $id)
     {
         $transaction = Transaction::with('items.product')->find($id);
 
-        if (!$transaction) {
+        if (! $transaction) {
             return response()->json([
-                'message' => 'Transaction not found'
+                'message' => 'Transaction not found',
             ], 404);
         }
 
@@ -196,7 +192,7 @@ class TransactionController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation error',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -226,7 +222,7 @@ class TransactionController extends Controller
                         }
                     }
                     // If new status implies stock should be returned
-                    else if (in_array($newStatus, $returnStockStatuses) && !in_array($oldStatus, $returnStockStatuses)) {
+                    elseif (in_array($newStatus, $returnStockStatuses) && ! in_array($oldStatus, $returnStockStatuses)) {
                         foreach ($transaction->items as $item) {
                             $product = $item->product;
                             if ($product) {
@@ -250,23 +246,22 @@ class TransactionController extends Controller
 
         return response()->json([
             'message' => 'Transaction updated successfully',
-            'data' => $transaction->load(['user', 'items.product'])
+            'data' => $transaction->load(['user', 'items.product']),
         ], 200);
     }
 
     /**
      * Remove the specified transaction from storage.
      *
-     * @param  string  $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(string $id)
     {
         $transaction = Transaction::with('items.product')->find($id);
 
-        if (!$transaction) {
+        if (! $transaction) {
             return response()->json([
-                'message' => 'Transaction not found'
+                'message' => 'Transaction not found',
             ], 404);
         }
 
@@ -290,14 +285,13 @@ class TransactionController extends Controller
         });
 
         return response()->json([
-            'message' => 'Transaction deleted successfully'
+            'message' => 'Transaction deleted successfully',
         ], 200);
     }
 
     /**
      * Get all transactions for the authenticated user with query parameters.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function myTransactions(Request $request)
@@ -338,7 +332,7 @@ class TransactionController extends Controller
 
         return response()->json([
             'message' => 'User transactions retrieved successfully',
-            'data' => $transactions
+            'data' => $transactions,
         ], 200);
     }
 }

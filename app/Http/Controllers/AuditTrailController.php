@@ -74,7 +74,7 @@ class AuditTrailController extends Controller
     {
         $auditTrail = AuditTrail::with(['user'])->find($id);
 
-        if (!$auditTrail) {
+        if (! $auditTrail) {
             return response()->json(['message' => 'Audit trail not found'], 404);
         }
 

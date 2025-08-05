@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Product;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class ProductPolicy
 {
@@ -37,7 +36,7 @@ class ProductPolicy
      */
     public function update(User $user, Product $product): bool
     {
-        return $user->role === 'admin' || 
+        return $user->role === 'admin' ||
                ($user->role === 'editor' && $product->user_id === $user->id);
     }
 
@@ -46,7 +45,7 @@ class ProductPolicy
      */
     public function delete(User $user, Product $product): bool
     {
-        return $user->role === 'admin' || 
+        return $user->role === 'admin' ||
                ($user->role === 'editor' && $product->user_id === $user->id);
     }
 

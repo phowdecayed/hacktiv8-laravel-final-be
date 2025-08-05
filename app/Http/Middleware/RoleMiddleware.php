@@ -15,19 +15,19 @@ class RoleMiddleware
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return response()->json([
-                'message' => 'Unauthorized. Please login first.'
+                'message' => 'Unauthorized. Please login first.',
             ], 401);
         }
 
         $user = auth()->user();
-        
-        if (!in_array($user->role, $roles)) {
+
+        if (! in_array($user->role, $roles)) {
             return response()->json([
                 'message' => 'Forbidden. Insufficient permissions.',
                 'required_roles' => $roles,
-                'your_role' => $user->role
+                'your_role' => $user->role,
             ], 403);
         }
 

@@ -4,18 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\ProductImage;
-use App\Models\Category;
 use App\Services\AuditTrailService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
     /**
      * Display a listing of the resource with query parameters.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
@@ -63,8 +61,10 @@ class ProductController extends Controller
         $products->getCollection()->transform(function ($product) {
             $product->images->transform(function ($image) {
                 $image->image_path = Storage::url($image->image_path);
+
                 return $image;
             });
+
             return $product;
         });
 
@@ -121,13 +121,15 @@ class ProductController extends Controller
     public function show(string $id)
     {
         $product = Product::with(['images', 'category', 'user'])->find($id);
-        if (!$product) {
+        if (! $product) {
             return response()->json(['message' => 'Product not found'], 404);
         }
         $product->images->map(function ($image) {
             $image->image_path = Storage::url($image->image_path);
+
             return $image;
         });
+
         return response()->json($product);
     }
 
@@ -137,7 +139,7 @@ class ProductController extends Controller
     public function update(Request $request, string $id)
     {
         $product = Product::find($id);
-        if (!$product) {
+        if (! $product) {
             return response()->json(['message' => 'Product not found'], 404);
         }
 
@@ -186,7 +188,7 @@ class ProductController extends Controller
                         break;
                     }
                 }
-                if (!$found) {
+                if (! $found) {
                     Storage::disk('public')->delete($existingImage->image_path);
                     $existingImage->delete();
                 }
@@ -212,7 +214,7 @@ class ProductController extends Controller
     public function destroy(string $id)
     {
         $product = Product::find($id);
-        if (!$product) {
+        if (! $product) {
             return response()->json(['message' => 'Product not found'], 404);
         }
 

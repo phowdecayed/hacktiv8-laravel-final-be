@@ -19,7 +19,7 @@ class UserController extends Controller
         $users = User::query()
             ->when($request->search, function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             })
             ->when($request->role, function ($query, $role) {
                 $query->where('role', $role);
@@ -48,7 +48,7 @@ class UserController extends Controller
 
         return response()->json([
             'data' => $users,
-            'message' => 'Users retrieved successfully'
+            'message' => 'Users retrieved successfully',
         ]);
     }
 
@@ -85,7 +85,7 @@ class UserController extends Controller
 
         return response()->json([
             'data' => $userData,
-            'message' => 'User retrieved successfully'
+            'message' => 'User retrieved successfully',
         ]);
     }
 
@@ -98,7 +98,7 @@ class UserController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
+            'email' => 'sometimes|string|email|max:255|unique:users,email,'.$user->id,
             'password' => 'sometimes|string|min:8|confirmed',
             'role' => 'sometimes|string|in:admin,user,editor,moderator',
         ]);
@@ -106,12 +106,12 @@ class UserController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation error',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
         $updateData = $request->only(['name', 'email', 'role']);
-        
+
         if ($request->has('password')) {
             $updateData['password'] = Hash::make($request->password);
         }
@@ -120,7 +120,7 @@ class UserController extends Controller
 
         return response()->json([
             'data' => $user,
-            'message' => 'User updated successfully'
+            'message' => 'User updated successfully',
         ]);
     }
 
@@ -131,24 +131,25 @@ class UserController extends Controller
     {
         $permissions = [
             'admin' => [
-                'manage_products', 'manage_categories', 'manage_transactions', 
-                'manage_users', 'view_audit_trails', 'manage_storage'
+                'manage_products', 'manage_categories', 'manage_transactions',
+                'manage_users', 'view_audit_trails', 'manage_storage',
             ],
             'editor' => [
                 'manage_products', 'manage_categories', 'create_transactions',
-                'manage_storage'
+                'manage_storage',
             ],
             'moderator' => [
                 'view_transactions', 'update_transactions', 'view_audit_trails',
-                'create_transactions'
+                'create_transactions',
             ],
             'user' => [
-                'create_transactions', 'view_own_transactions'
-            ]
+                'create_transactions', 'view_own_transactions',
+            ],
         ];
 
         // Gunakan 'user' sebagai default jika role null atau tidak dikenal
         $effectiveRole = $role ?? 'user';
+
         return $permissions[$effectiveRole] ?? $permissions['user'];
     }
 
@@ -161,11 +162,12 @@ class UserController extends Controller
             'admin' => 'Full access to all system features and user management',
             'editor' => 'Can manage products, categories, and storage',
             'moderator' => 'Can manage transactions and view audit trails',
-            'user' => 'Can create transactions and view own data'
+            'user' => 'Can create transactions and view own data',
         ];
 
         // Gunakan 'user' sebagai default jika role null atau tidak dikenal
         $effectiveRole = $role ?? 'user';
+
         return $descriptions[$effectiveRole] ?? $descriptions['user'];
     }
 
@@ -178,14 +180,14 @@ class UserController extends Controller
 
         if (auth()->id() === $user->id) {
             return response()->json([
-                'message' => 'Cannot delete your own account'
+                'message' => 'Cannot delete your own account',
             ], 422);
         }
 
         $user->delete();
 
         return response()->json([
-            'message' => 'User deleted successfully'
+            'message' => 'User deleted successfully',
         ]);
     }
 
@@ -203,7 +205,7 @@ class UserController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation error',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -211,7 +213,7 @@ class UserController extends Controller
 
         return response()->json([
             'data' => $user,
-            'message' => 'User role updated successfully'
+            'message' => 'User role updated successfully',
         ]);
     }
 }

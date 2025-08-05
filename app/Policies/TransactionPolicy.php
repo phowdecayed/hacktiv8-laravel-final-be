@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Transaction;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class TransactionPolicy
 {
@@ -21,7 +20,7 @@ class TransactionPolicy
      */
     public function view(User $user, Transaction $transaction): bool
     {
-        return $user->role === 'admin' || 
+        return $user->role === 'admin' ||
                $user->role === 'moderator' ||
                $transaction->user_id === $user->id;
     }
@@ -39,7 +38,7 @@ class TransactionPolicy
      */
     public function update(User $user, Transaction $transaction): bool
     {
-        return $user->role === 'admin' || 
+        return $user->role === 'admin' ||
                ($user->role === 'moderator' && $transaction->user_id !== $user->id) ||
                ($transaction->user_id === $user->id && $transaction->status === 'pending');
     }
@@ -49,7 +48,7 @@ class TransactionPolicy
      */
     public function delete(User $user, Transaction $transaction): bool
     {
-        return $user->role === 'admin' || 
+        return $user->role === 'admin' ||
                ($transaction->user_id === $user->id && $transaction->status === 'pending');
     }
 

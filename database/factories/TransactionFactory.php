@@ -2,10 +2,9 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Transaction;
 use App\Models\User;
-use App\Models\Product;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * Factory untuk model Transaction
@@ -44,7 +43,7 @@ class TransactionFactory extends Factory
         return $this->afterCreating(function (\App\Models\Transaction $transaction) {
             // Buat 1-3 transaction items untuk setiap transaksi
             $itemCount = fake()->numberBetween(1, 3);
-            
+
             for ($i = 0; $i < $itemCount; $i++) {
                 $product = \App\Models\Product::inRandomOrder()->first() ?? \App\Models\Product::factory()->create();
                 $quantity = fake()->numberBetween(1, 5);

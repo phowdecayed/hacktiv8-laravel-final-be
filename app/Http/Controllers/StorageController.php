@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\StorageFile;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class StorageController extends Controller
 {
@@ -15,9 +15,9 @@ class StorageController extends Controller
 
         if ($request->has('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('filename', 'like', "%{$search}%")
-                  ->orWhere('original_name', 'like', "%{$search}%");
+                    ->orWhere('original_name', 'like', "%{$search}%");
             });
         }
 
@@ -32,7 +32,7 @@ class StorageController extends Controller
 
         $sort = $request->get('sort', 'created_at');
         $order = $request->get('order', 'asc');
-        
+
         $allowedSorts = ['filename', 'size', 'created_at', 'updated_at'];
         if (in_array($sort, $allowedSorts)) {
             $query->orderBy($sort, $order === 'desc' ? 'desc' : 'asc');
@@ -43,14 +43,15 @@ class StorageController extends Controller
 
         $files = $query->paginate($limit);
 
-        $files->getCollection()->transform(function($file) {
+        $files->getCollection()->transform(function ($file) {
             $file->file_url = Storage::url($file->filename);
+
             return $file;
         });
 
         return response()->json([
             'message' => 'Files retrieved successfully',
-            'data' => $files
+            'data' => $files,
         ], 200);
     }
 
@@ -72,7 +73,7 @@ class StorageController extends Controller
         $size = $file->getSize();
         $userId = Auth::id();
 
-        $path = $file->store('public/user_' . $userId . '/' . ($request->folder ?? ''), 'local');
+        $path = $file->store('public/user_'.$userId.'/'.($request->folder ?? ''), 'local');
         $filename = str_replace('public/', '', $path);
 
         $storageFile = StorageFile::create([
@@ -85,7 +86,7 @@ class StorageController extends Controller
 
         return response()->json([
             'message' => 'File uploaded successfully',
-            'data' => $storageFile
+            'data' => $storageFile,
         ], 201);
     }
 
@@ -97,7 +98,7 @@ class StorageController extends Controller
             abort(403, 'You do not have permission to access this file');
         }
 
-        return Storage::disk('local')->download('public/' . $file->filename, $file->original_name);
+        return Storage::disk('local')->download('public/'.$file->filename, $file->original_name);
     }
 
     public function destroy($filename)
